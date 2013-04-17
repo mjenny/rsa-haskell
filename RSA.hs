@@ -29,5 +29,6 @@ import Prelude 		-- contains gcd function(greatest common decimal)
 -- public functions
 --generatePrivateKey
 --generatePublicKey
---encrypt 
---decrypt
+encrypt k n M = mod (M^k) n
+
+decrypt d n C = mod (C^d) n
