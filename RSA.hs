@@ -49,12 +49,13 @@ millerRabin x = (mod (2^(x-1)) x) not (1)
 
 -- checks if x is prime
 -- all even numbers equal to 
+isPrime :: Integer -> Bool
 isPrime 1 = False
 isPrime 2 = True
-isPrime x = isNotEven x
+isPrime x = isNotPrime x
     where
-        isNotEven z | even z == False = length [y | y <- 2:(filter (not . even) [2.. (round (sqrt (fromInteger x)))]), mod x y == 0] == 0
-                    | otherwise = False
+        isNotPrime z | even z == False && (not ((mod z 5) == 0)) && (not ((mod z 3) == 0)) && (not ((mod z 7) == 0)) = length [y | y <- 2:filter (not.even) [2.. (round (sqrt (fromInteger x)))], mod x y == 0] == 0
+                     | otherwise = False
 
 -- use to save performance while doing millerRabin
 -- shiftR = bitwise right shift
