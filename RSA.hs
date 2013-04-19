@@ -29,6 +29,7 @@ import Data.Bits
 
 -- Source: http://stackoverflow.com/questions/13300533/haskell-prime-number-generator-according-to-bits-for-very-large-numbers
 
+{-
 rndPrime :: Int -> IO Integer
 rndPrime bits =
     fix $ \again -> do
@@ -44,23 +45,24 @@ rndPrimes bits = do
 
 millerRabin :: 
 millerRabin x = (mod (2^(x-1)) x) not (1)
+-}
 
 -- checks if x is prime
 -- all even numbers equal to 
 isPrime 1 = False
 isPrime 2 = True
-isPrime x = isEven x
+isPrime x = isNotEven x
     where
-        isEven z | filter even [z] == [] = length [y | y <- 2:(filter (not . even) [2.. (round (sqrt (fromInteger x)))]), mod x y == 0] == 0
-                 | otherwise = False
+        isNotEven z | even z == False = length [y | y <- 2:(filter (not . even) [2.. (round (sqrt (fromInteger x)))]), mod x y == 0] == 0
+                    | otherwise = False
 
 -- use to save performance while doing millerRabin
 -- shiftR = bitwise right shift
 --squareMultiply b e = 
 
 -- public functions
---generatePrivateKey
---generatePublicKey
+generatePrivateKey = True
+generatePublicKey = True
 encrypt k n m = mod (m^k) n
 
 decrypt d n c = mod (c^d) n
