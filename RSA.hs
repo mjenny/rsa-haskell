@@ -46,7 +46,7 @@ millerRabin ::
 millerRabin x = (mod (2^(x-1)) x) not (1)
 
 -- checks if x is prime
--- all even numbers equal to 
+-- all even numbers equal directly to False
 isPrime 1 = False
 isPrime 2 = True
 isPrime x = isEven x
