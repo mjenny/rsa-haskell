@@ -45,6 +45,14 @@ rndPrimes bits = do
 millerRabin :: 
 millerRabin x = (mod (2^(x-1)) x) not (1)
 
+-- checks if x is prime
+-- all even numbers equal to 
+isPrime 1 = False
+isPrime 2 = True
+isPrime x = isEven x
+    where
+        isEven z | filter even [z] == [] = length [y | y <- 2:(filter (not . even) [2.. (round (sqrt (fromInteger x)))]), mod x y == 0] == 0
+                 | otherwise = False
 
 -- use to save performance while doing millerRabin
 -- shiftR = bitwise right shift
@@ -56,3 +64,4 @@ millerRabin x = (mod (2^(x-1)) x) not (1)
 encrypt k n m = mod (m^k) n
 
 decrypt d n c = mod (c^d) n
+
