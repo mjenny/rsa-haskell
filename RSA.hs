@@ -6,7 +6,6 @@ module RSA
 ) where
 
 -- # import required external modules
-import Prelude 		-- contains gcd function(greatest common divisor)
 import System.Random
 import Control.Monad.Fix 
 import Data.Bits
@@ -66,22 +65,23 @@ isNotDivisor [] _ = True
 isNotDivisor (w:ws) x | (mod x w) == 0 = False
 		      | otherwise = isNotDivisor ws x
 		      
+-- modular multiplicative inverse
+inverseMod :: Integer -> Integer -> Integer
+inverseMod e n =
+  (x + n) `mod` n
+  where
+    (z, (x, y)) = ((gcd e n),euclid e n)
 
+-- extended euclidean algorithm    
 euclid :: Integer -> Integer -> (Integer, Integer)
-euclid 0 b = (0,1)
-euclid a b
-  | b == 0 = (1,0)
+euclid 0 n = (0,1)
+euclid e n
+  | n == 0 = (1,0)
   | otherwise = (t, s-q*t)
     where
-      (q, r) = quotRem a b
-      (s, t) = euclid b r
-
-inverseMod :: Integer -> Integer -> Integer
-inverseMod a m =
-  (x + m) `mod` m
-  where
-    (z, (x, y)) = ((gcd a m),euclid a m)
-
+      (q, r) = quotRem e n
+      (s, t) = euclid n r
+    
 -- use to save performance while doing millerRabin
 -- shiftR = bitwise right shift
 --squareMultiply b e = 

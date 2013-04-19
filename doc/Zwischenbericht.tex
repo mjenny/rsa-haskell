@@ -104,7 +104,7 @@
 % Inhalt Start
 
 \section{Abstract}
-
+Dies ist ein Semesterprojekt im Modul Konzepte von Programmiersprachen der Fachhochschule Nordwestschweiz. Ziel der Arbeit besteht darin Übung im Umgang mit funktionalen Programmiersprachen, insbesondere Haskell, zu bekommen.
 
 \section{Idee des Projektes}
 Ziel unseres Projektes ist es eine funktionierende Implementation nach der Funktionsweise von RSA zu programmieren. Diese muss nicht unbedingt den Sicherheitsstandards des echten RSA entsprechen, soll aber sämtliche Funktionen bereitstellen wie das Generieren von Keys sowie Ver- und Entschlüsselung von Strings.
@@ -124,16 +124,32 @@ Es wird ein privater und ein öffentlicher Schlüssel generiert. Der öffentlich
 \end{enumerate}
 
 \subsection{Verwendete mathematische Formeln und Algorithmen}
-\begin{itemize}
-\item ggt (grösster gemeinsamer Teiler)
-\item erweiterter Euklid
-\item inverer Modulo
-\item diverse Algorithmen zum Verifizieren von Primzahlen
-\end{itemize}
+Bisher verwenden wir für unseren RSA Algorithmus die folgenden mathematischen Definitionen. 
+\subsubsection{erweiterter euklidischer Algorithmus}
+$ggT(a,b)= ax+by$
+\subsubsection{multiplikative Inverse}
+$a^{-1}\equiv x(mod$ $ m)$
 
-\section{Haskell-Programme}
+
+\section{Haskell-Code}
+\subsection{Header}
+Wir schreiben sämtlichen Programmcode als Modul, so dass dieser auch in anderen Projekten genutzt werden kann. Dazu müssen sowohl Name des Moduls, als auch die nach aussen angebotenen Funktionen definiert werden. Per import werden weitere Module geladen auf welche unser Programm angewiesen ist.
 \lstinputlisting[language=haskell,caption=Modul Header,style=JavaStyle]{includes/module_header.hs}
 
+\subsection{Funktion isPrime}
+Der folgende Code überprüft ob eine Zahl x eine Primzahl ist. Um die Performance zu steigern, wird zuallererst überprüft ob die Zahl x durch 2, 3, 5 oder 7 teilbar ist. Ist dies der Fall, wird sofort False zurückgegeben.
+Ist dies nicht der Fall, wird über die Funktion getDivisorList eine Liste aller Zahlen von 2 bis $\sqrt{x}$ generiert.
+
+Diese Liste wird nun mit der Funktion isNotDivisor auf Teiler von x überprüft. Sobald ein Teiler gefunden wird, liefert sie False zurück. Wird kein Teiler gefunden, ist die Zahl eine Primzahl und die Funktion gibt True zurück.
+\lstinputlisting[language=haskell,caption=überprüfen ob Zahl Primzahl ist,style=JavaStyle]{includes/isPrime_function.hs}
+
+\subsection{Funktion inverseMod}
+Das multiplikative inverse Modulo wird benötigt um den einen Teil des privaten Schlüssels zu berechnen. Dies geschieht mit Hilfe des erweiterten euklidischen Algorithmus. Die zugrundeliegenden mathematischen Formeln haben wir von Wikipedia.
+
+\lstinputlisting[language=haskell,caption=Teil d des Privatekeys berechnen,style=JavaStyle]{includes/inverseMod_function.hs}
+
 \section{Testfälle}
+tbd
+
 
 \end{document} % Inhalt Ende 
