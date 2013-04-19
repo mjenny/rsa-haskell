@@ -51,7 +51,7 @@
  basicstyle=\footnotesize\ttfamily, % Standardschrift
  numbers=left,               % Ort der Zeilennummern
  numberstyle=\tiny,          % Stil der Zeilennummern
- stepnumber=5,              % Abstand zwischen den Zeilennummern
+ stepnumber=1,              % Abstand zwischen den Zeilennummern
  numbersep=5pt,              % Abstand der Nummern zum Text
  tabsize=2,                  % Groesse von Tabs
  extendedchars=true,         %
@@ -105,8 +105,9 @@
 
 \section{Abstract}
 
+
 \section{Idee des Projektes}
-Ziel unseres Projektes ist es eine funktionierende Implementation nach der Funktionsweise von RSA zu programmieren. Diese muss nicht unbedingt den Sicherheitsstandards des "echten" RSA entsprechen, soll aber sämtliche Funktionen bereitstellen wie das Generieren von Keys sowie Ver- und Entschlüsselung von Strings.
+Ziel unseres Projektes ist es eine funktionierende Implementation nach der Funktionsweise von RSA zu programmieren. Diese muss nicht unbedingt den Sicherheitsstandards des echten RSA entsprechen, soll aber sämtliche Funktionen bereitstellen wie das Generieren von Keys sowie Ver- und Entschlüsselung von Strings.
 Soweit möglich versuchen wir dabei die im Modul Kryptografie kennengelernten Algorithmen zu verwenden.
 
 \section{Theoretischer Teil}
@@ -126,13 +127,12 @@ Es wird ein privater und ein öffentlicher Schlüssel generiert. Der öffentlich
 \begin{itemize}
 \item ggt (grösster gemeinsamer Teiler)
 \item erweiterter Euklid
-\item 
+\item inverer Modulo
+\item diverse Algorithmen zum Verifizieren von Primzahlen
 \end{itemize}
 
-Worum geht es genau, verwendete Begriffe, etc., nicht zu lange
-
 \section{Haskell-Programme}
-Source Code mit ausführlichen Erläuterungen wie und warum diese funktionieren
+\lstinputlisting[language=haskell,caption=Modul Header,style=JavaStyle]{includes/module_header.hs}
 
 \section{Testfälle}
 
