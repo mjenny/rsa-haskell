@@ -104,47 +104,48 @@
 % Inhalt Start
 
 \section{Abstract}
-Dies ist ein Semesterprojekt im Modul Konzepte von Programmiersprachen der Fachhochschule Nordwestschweiz. Ziel der Arbeit besteht darin Übung im Umgang mit funktionalen Programmiersprachen, insbesondere Haskell, zu bekommen.
+Dies ist ein Semesterprojekt im Modul Konzepte von Programmiersprachen an der Fachhochschule Nordwestschweiz. Ziel der Arbeit besteht darin Übung im Umgang mit funktionalen Programmiersprachen, insbesondere Haskell, zu bekommen.
 
 \section{Idee des Projektes}
-Ziel unseres Projektes ist es eine funktionierende Implementation nach der Funktionsweise von RSA zu programmieren. Diese muss nicht unbedingt den Sicherheitsstandards des echten RSA entsprechen, soll aber sämtliche Funktionen bereitstellen wie das Generieren von Keys sowie Ver- und Entschlüsselung von Strings.
+Ziel unseres Projektes ist es eine funktionierende Implementierung des Verschlüsselungssystem RSA umzusetzen. Diese wird nicht den Sicherheitsstandards für produktive RSA Verschlüsselungen entsprechen, sondern sie soll einen Überblick über die Funktionsweise des RSA Verschlüsselungsverfahrens bieten. Es werden daher sämtliche Funktionen bereitgestellen wie das Generieren von Keys (inkl. Primzahlenerkennung) sowie Ver- und Entschlüsselung von Strings.
+
 Soweit möglich versuchen wir dabei die im Modul Kryptografie kennengelernten Algorithmen zu verwenden.
 
 \section{Theoretischer Teil}
-RSA (benannt nach den Erfindern Ron Rivest, Adi Shamir, und Leonard Adleman) ist ein asymmetrisches kryptografisches Verschlüsselungsverfahren, welches sowohl zur Verschlüsselung, als auch zur digitalen Signatur verwendet werden kann.
+RSA (benannt nach den Erfindern Ron Rivest, Adi Shamir und Leonard Adleman) ist ein asymmetrisches kryptografisches Verschlüsselungsverfahren, welches sowohl zur Verschlüsselung, als auch zur digitalen Signatur verwendet werden kann.
 
-Es wird ein privater und ein öffentlicher Schlüssel generiert. Der öffentliche wird zum Verschlüsseln und zum Prüfen von Signaturen verwendet und ist öffentlich zugänglich. Der private Schlüssel hingegen wird zum Entschlüsseln, sowie zum Signieren der Daten verwendet.
+Es wird ein privater und ein öffentlicher Schlüssel generiert. Der Öffentliche wird zum Verschlüsseln und zum Prüfen von Signaturen verwendet und ist öffentlich zugänglich. Der private Schlüssel hingegen wird zum Entschlüsseln, sowie zum Signieren der Daten verwendet und muss geheim bleiben.
 
 \subsection{Vorgehen RSA}
 \begin{enumerate}
-\item Wähle 2 Primzahlen p,q
-\item n = p * q
+\item Wähle 2 Primzahlen p, q
+\item n = p*q
 \item Wähle natürliche Zahl e, teilerfremd zu $\phi (n)$, d.h. $gcd(e,\phi(n)) = 1$, für die gilt $1 < e < \phi(n)$
-\item bestimme natürliche Zahl d mit $e*d*mod \phi (n) = 1$
+\item Bestimme natürliche Zahl d mit $d=e^{-1}$, d.h. $e*d \equiv 1$ $mod$ $\phi (n) \Longleftrightarrow e*d*+k*\phi (n) = 1$
 \end{enumerate}
 
 \subsection{Verwendete mathematische Formeln und Algorithmen}
 Bisher verwenden wir für unseren RSA Algorithmus die folgenden mathematischen Definitionen. 
 \subsubsection{erweiterter euklidischer Algorithmus}
 $ggT(a,b)= ax+by$
-\subsubsection{multiplikative Inverse}
-$a^{-1}\equiv x(mod$ $ m)$
+\subsubsection{modulare multiplikative Inverse}
+$a^{-1}\equiv x $ $(mod$ $ m)$
 
 
 \section{Haskell-Code}
 \subsection{Header}
-Wir schreiben sämtlichen Programmcode als Modul, so dass dieser auch in anderen Projekten genutzt werden kann. Dazu müssen sowohl Name des Moduls, als auch die nach aussen angebotenen Funktionen definiert werden. Per import werden weitere Module geladen auf welche unser Programm angewiesen ist.
+Wir schreiben sämtlichen Programmcode als Modul, so dass dieser auch in anderen Projekten genutzt werden kann. Dazu müssen sowohl Name des Moduls, als auch die nach aussen angebotenen Funktionen definiert werden. Per import werden weitere Module geladen, die unser Programm benötigt.
 \lstinputlisting[language=haskell,caption=Modul Header,style=JavaStyle]{includes/module_header.hs}
 
 \subsection{Funktion isPrime}
-Der folgende Code überprüft ob eine Zahl x eine Primzahl ist. Um die Performance zu steigern, wird zuallererst überprüft ob die Zahl x durch 2, 3, 5 oder 7 teilbar ist. Ist dies der Fall, wird sofort False zurückgegeben.
+Der folgende Code überprüft ob eine Zahl x eine Primzahl ist. Um die Performance zu steigern, wird vor der Listenabfrage überprüft, ob die Zahl x durch 2 (even), 3, 5 oder 7 teilbar ist. Ist dies der Fall, wird sofort False zurückgegeben.
 Ist dies nicht der Fall, wird über die Funktion getDivisorList eine Liste aller Zahlen von 2 bis $\sqrt{x}$ generiert.
 
 Diese Liste wird nun mit der Funktion isNotDivisor auf Teiler von x überprüft. Sobald ein Teiler gefunden wird, liefert sie False zurück. Wird kein Teiler gefunden, ist die Zahl eine Primzahl und die Funktion gibt True zurück.
-\lstinputlisting[language=haskell,caption=überprüfen ob Zahl Primzahl ist,style=JavaStyle]{includes/isPrime_function.hs}
+\lstinputlisting[language=haskell,caption=Überprüfen ob Zahl Primzahl ist,style=JavaStyle]{includes/isPrime_function.hs}
 
 \subsection{Funktion inverseMod}
-Das multiplikative inverse Modulo wird benötigt um den einen Teil des privaten Schlüssels zu berechnen. Dies geschieht mit Hilfe des erweiterten euklidischen Algorithmus. Die zugrundeliegenden mathematischen Formeln haben wir von Wikipedia.
+Das modulare multiplikative Inverse Modulo benötigt, um einen Teil des privaten Schlüssels zu berechnen. Dies geschieht mit Hilfe des erweiterten euklidischen Algorithmus. Die zugrundeliegenden mathematischen Formeln haben wir von Wikipedia.
 
 \lstinputlisting[language=haskell,caption=Teil d des Privatekeys berechnen,style=JavaStyle]{includes/inverseMod_function.hs}
 
