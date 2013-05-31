@@ -31,3 +31,7 @@ cabal-dev
 *.mtc1
 *.out
 *.synctex.gz
+/Test.hs
+/dafis-arithmoi-de12fe7f6de6.zip
+/priv.key
+/pub.key
