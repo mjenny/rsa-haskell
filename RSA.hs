@@ -130,6 +130,7 @@ enterPrimes e =
 
 -- public functions
 
+
 -- Interaction to generate key pair which are stored in pub.key/priv.key
 generateKeyPair :: IO ()
 generateKeyPair =
@@ -188,4 +189,23 @@ decrypt =
        putStrLn (show (decryptExec d n c))
 
 
+-- getNextIntBlock n = length (getNextPossibleCharBlockSize n)
+  
+-- get next block of chars to encrypt / decrypt
+-- info: chars are stored as utf8 (8bits)
+getNextCharBlock :: String -> Int -> [Char]
+getNextCharBlock m n = take (getNextPossibleCharBlockSize n) m
 
+-- if n < m -> RSA not possible, returns number of chars, not actual size
+getNextPossibleCharBlockSize n = snd (getNextSmallerPowerOfB 256 n)
+
+-- returns last power of b which is still smaller than x
+getNextSmallerPowerOfB b x = getNextSmallerPowerOfB2 b x 1
+getNextSmallerPowerOfB2 b x e
+  | x > (b^e) = getNextSmallerPowerOfB2 b x (e+1)
+  | x == (b^e) = (b^e,e)
+  | otherwise = (b^(e-1),(e-1))
+
+  
+-- tests if private key d meets all the criterias
+testD e d p q = mod (e*d) ((p-1)*(q-1)) == 1
