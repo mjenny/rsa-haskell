@@ -79,10 +79,10 @@ euclid e n
 		
 -- modular multiplicative inverse
 inverseMod :: Integer -> Integer -> Integer
-inverseMod e n =
-  (x + n) `mod` n
+inverseMod e phi =
+  (x + phi) `mod` phi
   where
-    (z, (x, y)) = ((gcd e n),euclid e n)
+    (z, (x, y)) = ((gcd e phi),euclid e phi)
 
 -- convert Integer to an Integer list which represents original Integer in binary
 toBin :: Integer -> [Integer]
@@ -103,20 +103,89 @@ powerModExec b e m c
     | head e == 1 = powerModExec b (tail e) m ((c^2 `mod ` m)*b `mod` m)
     | otherwise = powerModExec b (tail e) m (c^2 `mod` m)
 
--- use to save performance while doing millerRabin
--- shiftR = bitwise right shift
---squareMultiply b e =
-
+-- executes encryption
 encryptExec :: Integer -> Integer -> Integer -> Integer
 encryptExec e n m = powerMod m e n
 
+-- executes decryption
 decryptExec :: Integer -> Integer -> Integer -> Integer
 decryptExec d n c = powerMod c d n
 
+-- Interaction to get fitting primes
+-- Control.Monad.Fix idea from StackOverflow: http://stackoverflow.com/a/13301611
+enterPrimes :: Integer -> IO (Integer, Integer)
+enterPrimes e =
+    fix $ \again -> do
+        putStrLn "Enter first prime: "
+        prime <- getLine
+        let p = read prime
+        putStrLn "Enter second prime: "
+        prime <- getLine
+        let q = read prime :: Integer
+            phi = (p-1)*(q-1)
+        if ((gcd e phi) == 1) then
+           return (p, q)
+        else
+           again
+
 -- public functions
-generateKeyPair = True
-encrypt = True
-decrypt = True
+
+-- Interaction to generate key pair which are stored in pub.key/priv.key
+generateKeyPair :: IO ()
+generateKeyPair =
+    do putStrLn "--------------------------------------------------------------------------"
+       putStrLn "Key generation started (e = 65537): "
+       writeFile ("pub.key") ""
+       writeFile ("priv.key") ""
+       let e = 65537 :: Integer
+       putStrLn "NOTICE: If the primes don't match the requirements [(gcd e phi) <> 1]"
+       putStrLn "you wil have to enter different ones."
+       putStrLn "Enter exponent (leave blank for default [65537])"
+       exp <- getLine
+       let e
+            | exp == "" = 65537 :: Integer
+            | otherwise = read exp :: Integer
+       primes <- enterPrimes e :: IO (Integer, Integer)
+       let p = fst primes
+           q = snd primes :: Integer
+           n = p*q
+           phi = (p-1)*(q-1)
+           d = inverseMod e phi :: Integer
+           resultPub = (e, n)
+           resultPriv = (d, n)
+       writeFile ("pub.key") (show resultPub)
+       writeFile ("priv.key") (show resultPriv)
+       putStrLn ("Key pair saved in pub.key and priv.key")
+
+-- interaction for encryption process
+encrypt :: IO ()
+encrypt =
+    do putStrLn "Please enter fileName which contains public key: "
+       pubKeyFileName <- getLine
+       stringFileContents <- readFile (pubKeyFileName ++ ".key")
+       let en = read stringFileContents :: (Integer, Integer)
+           e = fst en
+           n = snd en
+       putStrLn "Please enter message to encrypt: "
+       message <- getLine
+       let m = read message :: Integer
+       putStr "Encrypted text: "
+       putStrLn (show (encryptExec e n m))
+
+-- interaction for decryption process
+decrypt :: IO ()
+decrypt =
+    do putStrLn "Please enter fileName which contains private key: "
+       privKeyFileName <- getLine
+       stringFileContents <- readFile (privKeyFileName ++ ".key")
+       let dn = read stringFileContents :: (Integer, Integer)
+           d = fst dn
+           n = snd dn
+       putStrLn "Please enter message to decrypt: "
+       cipher <- getLine
+       let c = read cipher :: Integer
+       putStr "Decrypted text: "
+       putStrLn (show (decryptExec d n c))
 
 
 
