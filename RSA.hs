@@ -188,24 +188,64 @@ decrypt =
        putStr "Decrypted text: "
        putStrLn (show (decryptExec d n c))
 
-
--- getNextIntBlock n = length (getNextPossibleCharBlockSize n)
+decryptString :: Integer -> Integer -> [Integer] -> [Char]
+decryptString d n cs
+  | (getNextPossibleCharBlockSize n) == 0 = [' ']
+  | otherwise = decryptBlocks d n cs
   
--- get next block of chars to encrypt / decrypt
+-- bs = blocklist
+decryptBlocks :: Integer -> Integer -> [Integer] -> [Char]
+decryptBlocks d n bs
+  | (length bs) == 1 = intBlockToCharBlock (fromIntegral (decryptExec d n (head bs)))
+  | otherwise = intBlockToCharBlock (fromIntegral (decryptExec d n (head bs))) ++ (decryptBlocks d n (tail bs))
+
+	   
+-- main function to enrypt strings
+encryptString :: Integer -> Integer -> [Char] -> [Integer]
+encryptString e n ms
+  | getNextPossibleCharBlockSize n == 0 = [-1]
+  | otherwise = encryptBlocks e n (getMessageBlocks ms (getNextPossibleCharBlockSize n))
+
+-- bs = blocklist
+encryptBlocks :: Integer -> Integer -> [Integer] -> [Integer]
+encryptBlocks e n bs
+  | (length bs) == 1 = [encryptExec e n (head bs)]
+  | otherwise = [encryptExec e n (head bs)] ++ (encryptBlocks e n (tail bs))
+
+-- build list of messageblocks, b = blocksize
+getMessageBlocks :: String -> Int -> [Integer]
+getMessageBlocks m b
+  | (length m) <= b = [fromIntegral (charBlockToIntBlock m 0)]
+  | otherwise = [fromIntegral (charBlockToIntBlock (take b m) 0)] ++ (getMessageBlocks (drop b m) b)
+
+-- cb = charblock, e = exponent (start with 0)
+charBlockToIntBlock cb e
+  | (length cb) == 1 = (ord (head cb)) * (256^e)
+  | otherwise = ((ord (head cb)) * (256^e)) + charBlockToIntBlock (tail cb) (e+1)
+
+-- ib = intblock, m = modulo, b = blocksize (chars)
+intBlockToCharBlock :: Int-> [Char]
+intBlockToCharBlock ib
+  | ib == 0 = []
+  | otherwise = [(chr (mod ib 256))] ++ intBlockToCharBlock (shiftR ib 8)
+
+-- get list of char blocks to encrypt / decrypt
 -- info: chars are stored as utf8 (8bits)
-getNextCharBlock :: String -> Int -> [Char]
-getNextCharBlock m n = take (getNextPossibleCharBlockSize n) m
+-- getCharBlocks :: String -> Int -> [[Char]]
+getCharBlocks m n 
+  | (length m) <= (getNextPossibleCharBlockSize n) = [m]
+  | otherwise = [(take (getNextPossibleCharBlockSize n) m)] ++ (getCharBlocks (drop (getNextPossibleCharBlockSize n) m) n)
+
 
 -- if n < m -> RSA not possible, returns number of chars, not actual size
-getNextPossibleCharBlockSize n = snd (getNextSmallerPowerOfB 256 n)
+getNextPossibleCharBlockSize n = snd (getNextSmallerPowerOfN 256 n)
 
 -- returns last power of b which is still smaller than x
-getNextSmallerPowerOfB b x = getNextSmallerPowerOfB2 b x 1
-getNextSmallerPowerOfB2 b x e
-  | x > (b^e) = getNextSmallerPowerOfB2 b x (e+1)
+getNextSmallerPowerOfN b x = getNextSmallerPowerOfN2 b x 1
+getNextSmallerPowerOfN2 b x e
+  | x > (b^e) = getNextSmallerPowerOfN2 b x (e+1)
   | x == (b^e) = (b^e,e)
   | otherwise = (b^(e-1),(e-1))
-
   
 -- tests if private key d meets all the criterias
 testD e d p q = mod (e*d) ((p-1)*(q-1)) == 1
