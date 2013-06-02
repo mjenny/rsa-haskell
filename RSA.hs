@@ -169,9 +169,8 @@ encrypt =
            n = snd en
        putStrLn "Please enter message to encrypt: "
        message <- getLine
-       let m = read message :: Integer
        putStr "Encrypted text: "
-       putStrLn (show (encryptExec e n m))
+       putStrLn (show (encryptString e n message))
 
 -- interaction for decryption process
 decrypt :: IO ()
@@ -184,22 +183,22 @@ decrypt =
            n = snd dn
        putStrLn "Please enter message to decrypt: "
        cipher <- getLine
-       let c = read cipher :: Integer
+       let c = read cipher :: [Integer]
        putStr "Decrypted text: "
-       putStrLn (show (decryptExec d n c))
+       putStrLn (show (decryptString d n c))
 
 decryptString :: Integer -> Integer -> [Integer] -> [Char]
 decryptString d n cs
   | (getNextPossibleCharBlockSize n) == 0 = [' ']
   | otherwise = decryptBlocks d n cs
-  
+
 -- bs = blocklist
 decryptBlocks :: Integer -> Integer -> [Integer] -> [Char]
 decryptBlocks d n bs
   | (length bs) == 1 = intBlockToCharBlock (fromIntegral (decryptExec d n (head bs)))
   | otherwise = intBlockToCharBlock (fromIntegral (decryptExec d n (head bs))) ++ (decryptBlocks d n (tail bs))
 
-	   
+	
 -- main function to enrypt strings
 encryptString :: Integer -> Integer -> [Char] -> [Integer]
 encryptString e n ms
@@ -232,7 +231,7 @@ intBlockToCharBlock ib
 -- get list of char blocks to encrypt / decrypt
 -- info: chars are stored as utf8 (8bits)
 -- getCharBlocks :: String -> Int -> [[Char]]
-getCharBlocks m n 
+getCharBlocks m n
   | (length m) <= (getNextPossibleCharBlockSize n) = [m]
   | otherwise = [(take (getNextPossibleCharBlockSize n) m)] ++ (getCharBlocks (drop (getNextPossibleCharBlockSize n) m) n)
 
@@ -246,6 +245,6 @@ getNextSmallerPowerOfN2 b x e
   | x > (b^e) = getNextSmallerPowerOfN2 b x (e+1)
   | x == (b^e) = (b^e,e)
   | otherwise = (b^(e-1),(e-1))
-  
+
 -- tests if private key d meets all the criterias
 testD e d p q = mod (e*d) ((p-1)*(q-1)) == 1
