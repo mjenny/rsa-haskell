@@ -15,38 +15,6 @@ import Data.Char
 
 -- # private functions
 
--- # get Tupel of two large primes
---getPrimes
-{-|
-	* this is a multi-line comment *
-	
-	Possibility to generate large prime numbers:
-	1. create candidate: odd number n of appropriate size
-	2. test n for primality (z.B. Miller-Rabin?)
-	3. if n is no prime, return to step 1
-
--}
-
--- Source: http://stackoverflow.com/questions/13300533/haskell-prime-number-generator-according-to-bits-for-very-large-numbers
-
-{-
-rndPrime :: Int -> IO Integer
-rndPrime bits =
-    fix $ \again -> do
-        x <- fmap (.|. 1) $ randomRIO (2^(bits - 1), 2^bits - 1)
-        if millerRabin x then return x else again
-
-rndPrimes :: Int -> IO (Integer, Integer)
-rndPrimes bits = do
-    p <- rndPrime bits
-    fix $ \again -> do
-        q <- rndPrime bits
-        if p /= q then return (p, q) else again
-
-millerRabin ::
-millerRabin x = (mod (2^(x-1)) x) not (1)
--}
-
 -- checks if x is prime
 -- all even numbers equal directly to False
 isPrime :: Integer -> Bool
@@ -123,13 +91,81 @@ enterPrimes e =
         prime <- getLine
         let q = read prime :: Integer
             phi = (p-1)*(q-1)
-        if ((gcd e phi) == 1) then
+        if ((gcd e phi) == 1 && (isPrime p) && (isPrime q)) then
            return (p, q)
         else
            again
 
--- public functions
+-- main function to decrypt strings
+decryptString :: Integer -> Integer -> [Integer] -> [Char]
+decryptString d n cs
+  | (getNextPossibleCharBlockSize n) == 0 = [' ']
+  | otherwise = decryptBlocks d n cs
 
+-- bs = blocklist
+decryptBlocks :: Integer -> Integer -> [Integer] -> [Char]
+decryptBlocks d n bs
+  | (length bs) == 1 = intBlockToCharBlock (fromIntegral (decryptExec d n (head bs)))
+  | otherwise = intBlockToCharBlock (fromIntegral (decryptExec d n (head bs))) ++ (decryptBlocks d n (tail bs))
+
+-- main function to enrypt strings
+encryptString :: Integer -> Integer -> [Char] -> [Integer]
+encryptString e n ms
+  | getNextPossibleCharBlockSize n == 0 = [-1]
+  | otherwise = encryptBlocks e n (getMessageBlocks ms (getNextPossibleCharBlockSize n))
+
+-- bs = blocklist
+encryptBlocks :: Integer -> Integer -> [Integer] -> [Integer]
+encryptBlocks e n bs
+  | (length bs) == 1 = [encryptExec e n (head bs)]
+  | otherwise = [encryptExec e n (head bs)] ++ (encryptBlocks e n (tail bs))
+
+-- build list of messageblocks, b = blocksize
+getMessageBlocks :: String -> Int -> [Integer]
+getMessageBlocks m b
+  | (length m) <= b = [fromIntegral (charBlockToIntBlock m 0)]
+  | otherwise = [fromIntegral (charBlockToIntBlock (take b m) 0)] ++ (getMessageBlocks (drop b m) b)
+
+-- cb = charblock, e = exponent (start with 0)
+charBlockToIntBlock :: [Char] -> Int -> Int
+charBlockToIntBlock cb e
+  | (length cb) == 1 = (ord (head cb)) * (256^e)
+  | otherwise = ((ord (head cb)) * (256^e)) + charBlockToIntBlock (tail cb) (e+1)
+
+-- ib = intblock, m = modulo, b = blocksize (chars)
+intBlockToCharBlock :: Int-> [Char]
+intBlockToCharBlock ib
+  | ib == 0 = []
+  | otherwise = [(chr (mod ib 256))] ++ intBlockToCharBlock (shiftR ib 8)
+
+-- get list of char blocks to encrypt / decrypt
+-- info: chars are stored as utf8 (8bits)
+getCharBlocks :: String -> Int -> [[Char]]
+getCharBlocks m n
+  | (length m) <= (getNextPossibleCharBlockSize n) = [m]
+  | otherwise = [(take (getNextPossibleCharBlockSize n) m)] ++ (getCharBlocks (drop (getNextPossibleCharBlockSize n) m) n)
+
+
+-- if n < m -> RSA not possible, returns number of chars, not actual size
+getNextPossibleCharBlockSize :: (Integral b, Num a, Ord a) => a -> b
+getNextPossibleCharBlockSize n = snd (getNextSmallerPowerOfN 256 n)
+
+-- returns last power of b which is still smaller than x
+getNextSmallerPowerOfN :: (Integral b, Num t, Ord t) => t -> t -> (t, b)
+getNextSmallerPowerOfN b x = getNextSmallerPowerOfN2 b x 1
+
+getNextSmallerPowerOfN2 :: (Integral b, Num t, Ord t) => t -> t -> b -> (t, b)
+getNextSmallerPowerOfN2 b x e
+  | x > (b^e) = getNextSmallerPowerOfN2 b x (e+1)
+  | x == (b^e) = (b^e,e)
+  | otherwise = (b^(e-1),(e-1))
+
+-- tests if private key d meets all the criterias
+testD :: Int -> Int -> Int -> Int -> Bool
+testD e d p q = mod (e*d) ((p-1)*(q-1)) == 1
+
+
+-- public functions
 
 -- Interaction to generate key pair which are stored in pub.key/priv.key
 generateKeyPair :: IO ()
@@ -140,7 +176,7 @@ generateKeyPair =
        writeFile ("priv.key") ""
        let e = 65537 :: Integer
        putStrLn "NOTICE: If the primes don't match the requirements [(gcd e phi) <> 1]"
-       putStrLn "you wil have to enter different ones."
+       putStrLn "you will have to enter different ones."
        putStrLn "Enter exponent (leave blank for default [65537])"
        exp <- getLine
        let e
@@ -161,90 +197,28 @@ generateKeyPair =
 -- interaction for encryption process
 encrypt :: IO ()
 encrypt =
-    do putStrLn "Please enter fileName which contains public key: "
+    do putStrLn "Please enter fileName which contains public key (e.g. pub.key): "
        pubKeyFileName <- getLine
-       stringFileContents <- readFile (pubKeyFileName ++ ".key")
+       stringFileContents <- readFile (pubKeyFileName)
        let en = read stringFileContents :: (Integer, Integer)
            e = fst en
            n = snd en
        putStrLn "Please enter message to encrypt: "
        message <- getLine
-       putStr "Encrypted text: "
+       putStr "Encrypted text (as int blocks): "
        putStrLn (show (encryptString e n message))
 
 -- interaction for decryption process
 decrypt :: IO ()
 decrypt =
-    do putStrLn "Please enter fileName which contains private key: "
+    do putStrLn "Please enter fileName which contains private key (e.g. priv.key): "
        privKeyFileName <- getLine
-       stringFileContents <- readFile (privKeyFileName ++ ".key")
+       stringFileContents <- readFile (privKeyFileName)
        let dn = read stringFileContents :: (Integer, Integer)
            d = fst dn
            n = snd dn
-       putStrLn "Please enter message to decrypt: "
+       putStrLn "Please enter message to decrypt (as int blocks): "
        cipher <- getLine
        let c = read cipher :: [Integer]
        putStr "Decrypted text: "
        putStrLn (show (decryptString d n c))
-
-decryptString :: Integer -> Integer -> [Integer] -> [Char]
-decryptString d n cs
-  | (getNextPossibleCharBlockSize n) == 0 = [' ']
-  | otherwise = decryptBlocks d n cs
-
--- bs = blocklist
-decryptBlocks :: Integer -> Integer -> [Integer] -> [Char]
-decryptBlocks d n bs
-  | (length bs) == 1 = intBlockToCharBlock (fromIntegral (decryptExec d n (head bs)))
-  | otherwise = intBlockToCharBlock (fromIntegral (decryptExec d n (head bs))) ++ (decryptBlocks d n (tail bs))
-
-	
--- main function to enrypt strings
-encryptString :: Integer -> Integer -> [Char] -> [Integer]
-encryptString e n ms
-  | getNextPossibleCharBlockSize n == 0 = [-1]
-  | otherwise = encryptBlocks e n (getMessageBlocks ms (getNextPossibleCharBlockSize n))
-
--- bs = blocklist
-encryptBlocks :: Integer -> Integer -> [Integer] -> [Integer]
-encryptBlocks e n bs
-  | (length bs) == 1 = [encryptExec e n (head bs)]
-  | otherwise = [encryptExec e n (head bs)] ++ (encryptBlocks e n (tail bs))
-
--- build list of messageblocks, b = blocksize
-getMessageBlocks :: String -> Int -> [Integer]
-getMessageBlocks m b
-  | (length m) <= b = [fromIntegral (charBlockToIntBlock m 0)]
-  | otherwise = [fromIntegral (charBlockToIntBlock (take b m) 0)] ++ (getMessageBlocks (drop b m) b)
-
--- cb = charblock, e = exponent (start with 0)
-charBlockToIntBlock cb e
-  | (length cb) == 1 = (ord (head cb)) * (256^e)
-  | otherwise = ((ord (head cb)) * (256^e)) + charBlockToIntBlock (tail cb) (e+1)
-
--- ib = intblock, m = modulo, b = blocksize (chars)
-intBlockToCharBlock :: Int-> [Char]
-intBlockToCharBlock ib
-  | ib == 0 = []
-  | otherwise = [(chr (mod ib 256))] ++ intBlockToCharBlock (shiftR ib 8)
-
--- get list of char blocks to encrypt / decrypt
--- info: chars are stored as utf8 (8bits)
--- getCharBlocks :: String -> Int -> [[Char]]
-getCharBlocks m n
-  | (length m) <= (getNextPossibleCharBlockSize n) = [m]
-  | otherwise = [(take (getNextPossibleCharBlockSize n) m)] ++ (getCharBlocks (drop (getNextPossibleCharBlockSize n) m) n)
-
-
--- if n < m -> RSA not possible, returns number of chars, not actual size
-getNextPossibleCharBlockSize n = snd (getNextSmallerPowerOfN 256 n)
-
--- returns last power of b which is still smaller than x
-getNextSmallerPowerOfN b x = getNextSmallerPowerOfN2 b x 1
-getNextSmallerPowerOfN2 b x e
-  | x > (b^e) = getNextSmallerPowerOfN2 b x (e+1)
-  | x == (b^e) = (b^e,e)
-  | otherwise = (b^(e-1),(e-1))
-
--- tests if private key d meets all the criterias
-testD e d p q = mod (e*d) ((p-1)*(q-1)) == 1
