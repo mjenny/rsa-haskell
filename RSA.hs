@@ -11,6 +11,7 @@ import Control.Monad.Fix
 import Data.Int
 import Data.Bits
 import Data.Char
+import System.IO
 
 
 -- # private functions
@@ -108,31 +109,31 @@ decryptBlocks d n bs
   | (length bs) == 1 = intBlockToCharBlock (fromIntegral (decryptExec d n (head bs)))
   | otherwise = intBlockToCharBlock (fromIntegral (decryptExec d n (head bs))) ++ (decryptBlocks d n (tail bs))
 
--- main function to enrypt strings
+-- main function to encrypt strings
 encryptString :: Integer -> Integer -> [Char] -> [Integer]
 encryptString e n ms
   | getNextPossibleCharBlockSize n == 0 = [-1]
   | otherwise = encryptBlocks e n (getMessageBlocks ms (getNextPossibleCharBlockSize n))
 
--- bs = blocklist
+-- bs = block list
 encryptBlocks :: Integer -> Integer -> [Integer] -> [Integer]
 encryptBlocks e n bs
   | (length bs) == 1 = [encryptExec e n (head bs)]
   | otherwise = [encryptExec e n (head bs)] ++ (encryptBlocks e n (tail bs))
 
--- build list of messageblocks, b = blocksize
+-- build list of message blocks, b = block size
 getMessageBlocks :: String -> Int -> [Integer]
 getMessageBlocks m b
   | (length m) <= b = [fromIntegral (charBlockToIntBlock m 0)]
   | otherwise = [fromIntegral (charBlockToIntBlock (take b m) 0)] ++ (getMessageBlocks (drop b m) b)
 
--- cb = charblock, e = exponent (start with 0)
+-- cb = char block, e = exponent (start with 0)
 charBlockToIntBlock :: [Char] -> Int -> Int
 charBlockToIntBlock cb e
   | (length cb) == 1 = (ord (head cb)) * (256^e)
   | otherwise = ((ord (head cb)) * (256^e)) + charBlockToIntBlock (tail cb) (e+1)
 
--- ib = intblock, m = modulo, b = blocksize (chars)
+-- ib = int block, m = modulo, b = block size (chars)
 intBlockToCharBlock :: Int-> [Char]
 intBlockToCharBlock ib
   | ib == 0 = []
@@ -160,11 +161,37 @@ getNextSmallerPowerOfN2 b x e
   | x == (b^e) = (b^e,e)
   | otherwise = (b^(e-1),(e-1))
 
--- tests if private key d meets all the criterias
+-- tests if private key d meets all the criteria
 testD :: Int -> Int -> Int -> Int -> Bool
 testD e d p q = mod (e*d) ((p-1)*(q-1)) == 1
 
+-- These functions are not used because of encoding problems with haskell ([SPACE] becomes
+-- "\231\191#\US" which is not realy what we want)
+{-
+-- function to convert [Integer] to the actual cipher text
+getCipherString :: Integer -> [Integer] -> [Char]
+getCipherString n cs
+  | (getNextPossibleCharBlockSize n) == 0 = [' ']
+  | otherwise = cipherBlocks n cs
 
+-- bs = blocklist
+cipherBlocks :: Integer -> [Integer] -> [Char]
+cipherBlocks n bs
+  | (length bs) == 1 = intBlockToCharBlock (fromInteger (head bs))
+  | otherwise = intBlockToCharBlock (fromIntegral (head bs)) ++ (cipherBlocks n (tail bs))
+
+-- function to convert the actual cipher text to a [Integer]
+getIntList :: Integer -> [Char] -> [Integer]
+getIntList n ms
+  | getNextPossibleCharBlockSize n == 0 = [-1]
+  | otherwise = intBlocks n (getMessageBlocks ms (getNextPossibleCharBlockSize n))
+
+-- bs = block list
+intBlocks :: Integer -> [Integer] -> [Integer]
+intBlocks n bs
+  | (length bs) == 1 = [(head bs)]
+  | otherwise = [(head bs)] ++ (intBlocks n (tail bs))
+-}
 -- public functions
 
 -- Interaction to generate key pair which are stored in pub.key/priv.key
