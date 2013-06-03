@@ -36,6 +36,13 @@ isNotDivisor [] _ = True
 isNotDivisor (w:ws) x | (mod x w) == 0 = False
 		      | otherwise = isNotDivisor ws x
 		
+-- modular multiplicative inverse
+inverseMod :: Integer -> Integer -> Integer
+inverseMod e phi =
+  (x + phi) `mod` phi
+  where
+    (z, (x, y)) = ((gcd e phi),euclid e phi)
+
 -- extended euclidean algorithm
 euclid :: Integer -> Integer -> (Integer, Integer)
 euclid 0 n = (0,1)
@@ -45,21 +52,6 @@ euclid e n
     where
       (q, r) = quotRem e n
       (s, t) = euclid n r
-		
--- modular multiplicative inverse
-inverseMod :: Integer -> Integer -> Integer
-inverseMod e phi =
-  (x + phi) `mod` phi
-  where
-    (z, (x, y)) = ((gcd e phi),euclid e phi)
-
--- convert Integer to an Integer list which represents original Integer in binary
-toBin :: Integer -> [Integer]
-toBin 0 = [0]
-toBin 1 = [1]
-toBin n
-    | n `mod` 2 == 0 = toBin (n `div` 2) ++ [0]
-    | otherwise = toBin (n `div` 2) ++ [1]
 
 -- modular exponentiation
 powerMod :: Integer -> Integer -> Integer -> Integer
@@ -71,6 +63,14 @@ powerModExec b e m c
     | e == [] = c
     | head e == 1 = powerModExec b (tail e) m ((c^2 `mod ` m)*b `mod` m)
     | otherwise = powerModExec b (tail e) m (c^2 `mod` m)
+
+-- convert Integer to an Integer list which represents original Integer in binary
+toBin :: Integer -> [Integer]
+toBin 0 = [0]
+toBin 1 = [1]
+toBin n
+    | n `mod` 2 == 0 = toBin (n `div` 2) ++ [0]
+    | otherwise = toBin (n `div` 2) ++ [1]
 
 -- executes encryption
 encryptExec :: Integer -> Integer -> Integer -> Integer
@@ -166,34 +166,6 @@ getNextSmallerPowerOfN2 b x e
 testD :: Int -> Int -> Int -> Int -> Bool
 testD e d p q = mod (e*d) ((p-1)*(q-1)) == 1
 
--- These functions are not used because of encoding problems with haskell ([SPACE] becomes
--- "\231\191#\US" which is not realy what we want)
-{-
--- function to convert [Integer] to the actual cipher text
-getCipherString :: Integer -> [Integer] -> [Char]
-getCipherString n cs
-  | (getNextPossibleCharBlockSize n) == 0 = [' ']
-  | otherwise = cipherBlocks n cs
-
--- bs = blocklist
-cipherBlocks :: Integer -> [Integer] -> [Char]
-cipherBlocks n bs
-  | (length bs) == 1 = intBlockToCharBlock (fromInteger (head bs))
-  | otherwise = intBlockToCharBlock (fromIntegral (head bs)) ++ (cipherBlocks n (tail bs))
-
--- function to convert the actual cipher text to a [Integer]
-getIntList :: Integer -> [Char] -> [Integer]
-getIntList n ms
-  | getNextPossibleCharBlockSize n == 0 = [-1]
-  | otherwise = intBlocks n (getMessageBlocks ms (getNextPossibleCharBlockSize n))
-
--- bs = block list
-intBlocks :: Integer -> [Integer] -> [Integer]
-intBlocks n bs
-  | (length bs) == 1 = [(head bs)]
-  | otherwise = [(head bs)] ++ (intBlocks n (tail bs))
--}
--- public functions
 
 -- Interaction to generate key pair which are stored in pub.key/priv.key
 generateKeyPair :: IO ()

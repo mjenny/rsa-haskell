@@ -1,0 +1,193 @@
+\documentclass[a4paper, 11pt]{article} % ISO-8859-1 - latin1
+
+%Math
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{ulem}
+\usepackage{stmaryrd} %f\UTF{00FC}r Blitz!
+
+%PageStyle
+\usepackage[ngerman]{babel} % deutsche Silbentrennung
+\usepackage[utf8]{inputenc} % wegen deutschen Umlauten
+\usepackage{fontenc}
+\usepackage{fancyhdr, graphicx} %for header/footer
+\usepackage{wasysym}
+\usepackage{fullpage}
+\usepackage{textcomp}
+
+% Listings
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{caption}
+
+% Commands
+\newcommand{\Bold}[1]{\textbf{#1}} %Boldface
+\newcommand{\Kursiv}[1]{\textit{#1}} %Italic
+\newcommand{\T}[1]{\text{#1}} %Textmode
+\newcommand{\Nicht}[1]{\T{\sout{$ #1 $}}} %Streicht Shit durch
+\newcommand{\lra}{\leftrightarrow} %Arrows
+\newcommand{\ra}{\rightarrow}
+\newcommand{\la}{\leftarrow}
+\newcommand{\lral}{\longleftrightarrow}
+\newcommand{\ral}{\longrightarrow}
+\newcommand{\lal}{\longleftarrow}
+\newcommand{\Lra}{\Leftrightarrow}
+\newcommand{\Ra}{\Rightarrow}
+\newcommand{\La}{\Leftarrow}
+\newcommand{\Lral}{\Longleftrightarrow}
+\newcommand{\Ral}{\Longrightarrow}
+\newcommand{\Lal}{\Longleftarrow}
+
+% Code listenings
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+ 
+\lstdefinestyle{JavaStyle}{
+ language=Java,
+ basicstyle=\footnotesize\ttfamily, % Standardschrift
+ numbers=left,               % Ort der Zeilennummern
+ numberstyle=\tiny,          % Stil der Zeilennummern
+ stepnumber=1,              % Abstand zwischen den Zeilennummern
+ numbersep=5pt,              % Abstand der Nummern zum Text
+ tabsize=2,                  % Groesse von Tabs
+ extendedchars=true,         %
+ breaklines=true,            % Zeilen werden Umgebrochen
+ frame=b,         
+ %commentstyle=\itshape\color{LightLime}, Was isch das? O_o
+ %keywordstyle=\bfseries\color{DarkPurple}, und das O_o
+ basicstyle=\footnotesize\ttfamily,
+ stringstyle=\color[RGB]{42,0,255}\ttfamily, % Farbe der String
+ keywordstyle=\color[RGB]{127,0,85}\ttfamily, % Farbe der Keywords
+ commentstyle=\color[RGB]{63,127,95}\ttfamily, % Farbe des Kommentars
+ showspaces=false,           % Leerzeichen anzeigen ?
+ showtabs=false,             % Tabs anzeigen ?
+ xleftmargin=17pt,
+ framexleftmargin=17pt,
+ framexrightmargin=5pt,
+ framexbottommargin=4pt,
+ showstringspaces=false      % Leerzeichen in Strings anzeigen ?        
+}
+
+%Config
+\renewcommand{\headrulewidth}{0pt}
+\setlength{\headheight}{15.2pt}
+\pagestyle{plain}
+
+%Metadata
+\title{Implementation eines Verschlüsselungs-Algorithmus nach dem Beispiel von RSA in Haskell}
+\author{Manuel Jenny \& Christian Glatthard, Projektteam 5}
+\date{4. Semester (FS 2013)}
+
+
+% hier beginnt das Dokument
+\begin{document}
+
+% Titelbild
+\maketitle
+\thispagestyle{fancy}
+
+\newpage
+
+% Inhaltsverzeichnis
+\pagenumbering{Roman}
+\tableofcontents	  	
+
+
+\newpage
+\setcounter{page}{1}
+\pagenumbering{arabic}
+
+% Inhalt Start
+
+\section{Abstract}
+Dies ist ein Semesterprojekt im Modul Konzepte von Programmiersprachen an der Fachhochschule Nordwestschweiz. Ziel der Arbeit besteht darin Übung im Umgang mit funktionalen Programmiersprachen, insbesondere Haskell, zu bekommen.
+
+\section{Idee des Projektes}
+Ziel unseres Projektes ist es eine funktionierende Implementierung des Verschlüsselungssystem RSA umzusetzen. Diese wird nicht den Sicherheitsstandards für produktive RSA Verschlüsselungen entsprechen, sondern sie soll einen Überblick über die Funktionsweise des RSA Verschlüsselungsverfahrens bieten. Es werden daher sämtliche Funktionen bereitgestellen wie das Generieren von Keys (inkl. Primzahlenerkennung) sowie Ver- und Entschlüsselung von Strings.
+
+Soweit möglich versuchen wir dabei die im Modul Kryptografie kennengelernten Algorithmen zu verwenden.
+
+\section{Theoretischer Teil}
+RSA (benannt nach den Erfindern Ron Rivest, Adi Shamir und Leonard Adleman) ist ein asymmetrisches kryptografisches Verschlüsselungsverfahren, welches sowohl zur Verschlüsselung, als auch zur digitalen Signatur verwendet werden kann.
+
+Es wird ein privater und ein öffentlicher Schlüssel generiert. Der Öffentliche wird zum Verschlüsseln und zum Prüfen von Signaturen verwendet und ist öffentlich zugänglich. Der private Schlüssel hingegen wird zum Entschlüsseln, sowie zum Signieren der Daten verwendet und muss geheim bleiben.
+
+\subsection{Vorgehen RSA}
+\begin{enumerate}
+\item Wähle 2 Primzahlen p, q
+\item n = p*q
+\item Wähle natürliche Zahl e, teilerfremd zu $\phi (n)$, d.h. $gcd(e,\phi(n)) = 1$, für die gilt $1 < e < \phi(n)$
+\item Bestimme natürliche Zahl d mit $d=e^{-1}$, d.h. $e*d \equiv 1$ $mod$ $\phi (n) \Longleftrightarrow e*d*+k*\phi (n) = 1$
+\end{enumerate}
+
+\subsection{Verwendete mathematische Formeln und Algorithmen}
+Bisher verwenden wir für unseren RSA Algorithmus die folgenden mathematischen Definitionen. 
+\subsubsection{erweiterter euklidischer Algorithmus}
+$ggT(a,b)= ax+by$
+\subsubsection{modulare multiplikative Inverse}
+$a^{-1}\equiv x $ $(mod$ $ m)$
+\subsubsection{Eulersche Phi-Funktion}
+$\phi (n) = { a \in N | 1 \leq a \leq n \and gcd(a,n) = 1 }$\linebreak
+$\phi (mn) = \phi (m) * \phi (n)$
+
+\section{Haskell-Code}
+\subsection{Header}
+Wir schreiben sämtlichen Programmcode als Modul, so dass dieser auch in anderen Projekten genutzt werden kann. Dazu müssen sowohl Name des Moduls, als auch die nach aussen angebotenen Funktionen definiert werden (generateKeyPair, encrypt, decrypt). Per Import werden weitere Module geladen, die unser Programm benötigt.
+\lstinputlisting[language=haskell,caption=Modul Header,style=JavaStyle]{includes/module_header.hs}
+
+\subsection{Funktion generateKeyPair}
+Die exportierten Funktionen sind interaktiv programmiert. Durch Nutzung von System.IO können die Primzahlen sowie der öffentliche Schlüssel eingegeben werden. Der private Schlüssel d wird mithilfe des inversen Modulo berechnet.
+Die Schlüssel werden je in einem separaten File gespeichert (pub.key, priv.key), und können so theoretisch den entsprechenden Parteien zur Verfügung gestellt werden.
+\lstinputlisting[language=haskell,caption=generateKeyPair,style=JavaStyle]{includes/generateKeyPair.hs}
+
+\subsubsection{Funktion enterPrimes}
+\lstinputlisting[language=haskell,caption=enterPrimes,style=JavaStyle]{includes/enterPrimes.hs}
+
+\subsection{Funktion isPrime}
+Der folgende Code überprüft ob eine Zahl x eine Primzahl ist. Um die Performance zu steigern, wird vor der Listenabfrage überprüft, ob die Zahl x durch 2 (even), 3, 5 oder 7 teilbar ist. Ist dies der Fall, wird sofort False zurückgegeben.
+Ist dies nicht der Fall, wird über die Funktion getDivisorList eine Liste aller Zahlen von 2 bis $\sqrt{x}$ generiert.
+
+Diese Liste wird nun mit der Funktion isNotDivisor auf Teiler von x überprüft. Sobald ein Teiler gefunden wird, liefert sie False zurück. Wird kein Teiler gefunden, ist die Zahl eine Primzahl und die Funktion gibt True zurück.
+\lstinputlisting[language=haskell,caption=Überprüfen ob Zahl Primzahl ist,style=JavaStyle]{includes/isPrime.hs}
+
+\subsubsection{Funktion inverseMod}
+Das modulare multiplikative Inverse Modulo benötigt, um einen Teil des privaten Schlüssels zu berechnen. Dies geschieht mit Hilfe des erweiterten euklidischen Algorithmus. Die zugrundeliegenden mathematischen Formeln haben wir von Wikipedia.
+\lstinputlisting[language=haskell,caption=inverseMod,style=JavaStyle]{includes/inversemod.hs}
+
+
+\subsection{Funktion encrypt}
+Um einen String zu verschlüsseln wird der öffentliche Schlüssel benötigt. Dieser wird entweder aus einem zuvor mit generateKeyPair generierten, oder einem von Hand erstellten File eingelesen.
+Die Funktion nimmt einen String auf, teilt ihn in möglichst grosse Blöcke (Blocklänge < n) und verschlüsselt diese daraufhin Zeichen für Zeichen. Als Zahlenwert für die Zeichen wird jeweils der UTF8 Code verwendet.
+Damit bei der Entschlüsselung wieder dieselben Blöcke bearbeitet werden, wird der Cipher-Text (Geheimtext) in Form einer Integer-Liste ausgegeben, wobei jedes Element der Liste einen Nachrichten-Block darstellt.
+Dadurch ist natürlich die Sicherheit der Verschlüsselung bei kleinen Schlüsseln nicht gewährleistet, da gleiche Blöcke auch immer den gleichen Geheimtext produzieren. Nimmt man jedoch grosse Schlüssel, 
+% -- Grösse in der Praxis? 2^512? -- 
+ so wird es nahezu unmöglich die Verschlüsselung zu knacken.
+
+% ------------------------ Probleme mit Zeichencodierung ? ---------------%
+
+
+\lstinputlisting[language=haskell,caption=encrypt,style=JavaStyle]{includes/encrypt.hs}
+\subsubsection{Funktion encryptString}
+\lstinputlisting[language=haskell,caption=encryptString,style=JavaStyle]{includes/encryptString.hs}
+
+\subsubsection{Funktion powermod (Square \& Multiply)}
+% --- Erklärung Square & Multiply, evt. auch im Theorie Teil ----- %
+\lstinputlisting[language=haskell,caption=powermod,style=JavaStyle]{includes/powermod.hs}
+
+
+\subsection{Funktion decrypt}
+\lstinputlisting[language=haskell,caption=encrypt,style=JavaStyle]{includes/decrypt.hs}
+\subsubsection{Funktion decryptString}
+\subsubsection{Funktion encryptBlocks}
+intBlockToCharBlock
+
+
+%\section{Testfälle}
+%tbd
+
+
+\end{document} % Inhalt Ende 

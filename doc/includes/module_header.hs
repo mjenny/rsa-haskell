@@ -7,5 +7,8 @@ module RSA
 
 -- # import required external modules
 import System.Random
-import Control.Monad.Fix 
+import Control.Monad.Fix
+import Data.Int
 import Data.Bits
+import Data.Char
+import System.IO

@@ -1,11 +1,11 @@
 -- modular multiplicative inverse
 inverseMod :: Integer -> Integer -> Integer
-inverseMod e n =
-  (x + n) `mod` n
+inverseMod e phi =
+  (x + phi) `mod` phi
   where
-    (z, (x, y)) = ((gcd e n),euclid e n)
+    (z, (x, y)) = ((gcd e phi),euclid e phi)
 
--- extended euclidean algorithm    
+-- extended euclidean algorithm
 euclid :: Integer -> Integer -> (Integer, Integer)
 euclid 0 n = (0,1)
 euclid e n
