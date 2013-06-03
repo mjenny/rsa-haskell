@@ -175,16 +175,16 @@ Dadurch ist natürlich die Sicherheit der Verschlüsselung bei kleinen Schlüsse
 \lstinputlisting[language=haskell,caption=encryptString,style=JavaStyle]{includes/encryptString.hs}
 
 \subsubsection{Funktion powermod (Square \& Multiply)}
-% --- Erklärung Square & Multiply, evt. auch im Theorie Teil ----- %
+% --- Erklärung Square & Multiply, evt. bereits im Theorie Teil ----- %
 \lstinputlisting[language=haskell,caption=powermod,style=JavaStyle]{includes/powermod.hs}
 
 
 \subsection{Funktion decrypt}
+Für die Verschlüsselung wird ein File mit einem gültigen Privatekey benötigt. Der Geheimtext muss in Form einer Integer-Liste angegeben werden, so wie er bei der Decrypt Methode generiert wird.
+Für die Entschlüsselung werden die Blöcke zuerst separat entschlüsselt und danach die einzelnen Zeichen wieder in UTF8 Zeichen umgewandelt und zu einem String zusammengesetzt.
 \lstinputlisting[language=haskell,caption=encrypt,style=JavaStyle]{includes/decrypt.hs}
 \subsubsection{Funktion decryptString}
-\subsubsection{Funktion encryptBlocks}
-intBlockToCharBlock
-
+\lstinputlisting[language=haskell,caption=encrypt,style=JavaStyle]{includes/decryptString.hs}
 
 %\section{Testfälle}
 %tbd

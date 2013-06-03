@@ -110,6 +110,12 @@ decryptBlocks d n bs
   | (length bs) == 1 = intBlockToCharBlock (fromIntegral (decryptExec d n (head bs)))
   | otherwise = intBlockToCharBlock (fromIntegral (decryptExec d n (head bs))) ++ (decryptBlocks d n (tail bs))
 
+  -- ib = int block, m = modulo, b = block size (chars)
+intBlockToCharBlock :: Int-> [Char]
+intBlockToCharBlock ib
+  | ib == 0 = []
+  | otherwise = [(chr (mod ib 256))] ++ intBlockToCharBlock (shiftR ib 8)
+  
 -- main function to encrypt strings
 encryptString :: Integer -> Integer -> [Char] -> [Integer]
 encryptString e n ms
@@ -133,12 +139,6 @@ charBlockToIntBlock :: [Char] -> Int -> Int
 charBlockToIntBlock cb e
   | (length cb) == 1 = (ord (head cb)) * (256^e)
   | otherwise = ((ord (head cb)) * (256^e)) + charBlockToIntBlock (tail cb) (e+1)
-
--- ib = int block, m = modulo, b = block size (chars)
-intBlockToCharBlock :: Int-> [Char]
-intBlockToCharBlock ib
-  | ib == 0 = []
-  | otherwise = [(chr (mod ib 256))] ++ intBlockToCharBlock (shiftR ib 8)
 
 -- get list of char blocks to encrypt / decrypt
 -- info: chars are stored as utf8 (8bits)
