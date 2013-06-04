@@ -93,6 +93,7 @@ enterPrimes e =
         let q = read prime :: Integer
             phi = (p-1)*(q-1)
         if ((gcd e phi) == 1 && (isPrime p) && (isPrime q)) then
+        -- ignore isPrime to use large possible primes generated with sage (http://www.sagemath.org)
         --if ((gcd e phi) == 1) then
            return (p, q)
         else
@@ -152,21 +153,18 @@ getCharBlocks m n
 getNextPossibleCharBlockSize :: (Integral b, Num a, Ord a) => a -> b
 getNextPossibleCharBlockSize n = snd (getNextSmallerPowerOfN 256 n)
 
--- returns last power of b which is still smaller than x
+-- returns last power of n which is still smaller than x
 getNextSmallerPowerOfN :: (Integral b, Num t, Ord t) => t -> t -> (t, b)
-getNextSmallerPowerOfN b x = getNextSmallerPowerOfN2 b x 1
+getNextSmallerPowerOfN n x = getNextSmallerPowerOfNExec n x 1
 
-getNextSmallerPowerOfN2 :: (Integral b, Num t, Ord t) => t -> t -> b -> (t, b)
-getNextSmallerPowerOfN2 b x e
-  | x > (b^e) = getNextSmallerPowerOfN2 b x (e+1)
-  | x == (b^e) = (b^e,e)
-  | otherwise = (b^(e-1),(e-1))
+-- execute getNextSmallerPowerOfN
+getNextSmallerPowerOfNExec :: (Integral b, Num t, Ord t) => t -> t -> b -> (t, b)
+getNextSmallerPowerOfNExec n x e
+  | x > (n^e) = getNextSmallerPowerOfNExec n x (e+1)
+  | x == (n^e) = (n^e,e)
+  | otherwise = (n^(e-1),(e-1))
 
--- tests if private key d meets all the criteria
-testD :: Int -> Int -> Int -> Int -> Bool
-testD e d p q = mod (e*d) ((p-1)*(q-1)) == 1
-
-
+-- # public functions
 -- Interaction to generate key pair which are stored in pub.key/priv.key
 generateKeyPair :: IO ()
 generateKeyPair =
@@ -223,8 +221,7 @@ decrypt =
        putStr "Decrypted text: "
        putStrLn (decryptString d n c)
 
-
---------------------------------------------------
+----------------------------------------------
 --	test cases
 --------------------------------------------------
 
@@ -237,8 +234,5 @@ testEncryptExec e n m c = (encryptExec e n m) == c
 testDecryptExec :: Integer -> Integer -> Integer -> Integer -> Bool
 testDecryptExec d n c m = (decryptExec d n c) == m
 
-testEncryptDecrypt :: String -> Integer -> Integer -> Integer -> Bool
-testEncryptDecrypt m e d n = m == (decryptString d n (encryptString d n m))
-
---testEncryptString
---testDecryptString
+testEncryptDecryptString :: String -> Integer -> Integer -> Integer -> Bool
+testEncryptDecryptString m e d n = m == (decryptString d n (encryptString d n m))

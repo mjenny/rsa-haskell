@@ -84,7 +84,7 @@
 \pagestyle{plain}
 
 %Metadata
-\title{Implementation des RSA Verschlüsselungs-Algorithmus in Haskell}
+\title{Implementation des RSA Verschlüsselungsalgorithmus in Haskell}
 \author{Manuel Jenny \& Christian Glatthard, Projektteam 5}
 \date{4. Semester (FS 2013)}
 
@@ -104,7 +104,7 @@
 Dies ist ein Semesterprojekt im Modul Konzepte von Programmiersprachen an der Fachhochschule Nordwestschweiz. Ziel der Arbeit besteht darin Übung im Umgang mit funktionalen Programmiersprachen, insbesondere Haskell, zu bekommen.
 
 \section{Idee des Projektes}
-Ziel unseres Projektes ist es eine funktionierende Implementierung des Verschlüsselungssystem RSA umzusetzen. Diese wird nicht den Sicherheitsstandards für produktive RSA Verschlüsselungen entsprechen, sondern sie soll einen Überblick über die Funktionsweise des RSA Verschlüsselungsverfahrens bieten. Es werden daher sämtliche Funktionen bereitgestellen wie das Generieren von Keys (inkl. Primzahlenerkennung) sowie Ver- und Entschlüsselung von Strings.
+Ziel unseres Projektes ist es eine funktionierende Implementierung des Verschlüsselungssystem RSA umzusetzen. Diese wird nicht den Sicherheitsstandards für produktive RSA Verschlüsselungen entsprechen, sondern sie soll einen Überblick über die Funktionsweise des RSA Verschlüsselungsverfahrens bieten. Es werden daher sämtliche Funktionen bereitgestellten wie das Generieren von Schlüsseln (inkl. Primzahlenerkennung) sowie Ver- und Entschlüsselung von Strings.
 
 Soweit möglich versuchen wir dabei die im Modul Kryptografie kennengelernten Algorithmen zu verwenden.
 
@@ -130,7 +130,7 @@ $ggT(a,b)= ax+by$
 \subsubsection{modular multiplikatives Inverse}
 $a^{-1}\equiv x $ $(mod$ $ m)$
 \subsubsection{Eulersche Phi-Funktion}
-Die eulersche Phi-Funktion gibt aus wieviele Zahlen $<$ n teilerfremd sind zu n.
+Die eulersche Phi-Funktion gibt aus wie viele Zahlen $<$ n teilerfremd sind zu n.
 $\phi (n) = { a \in N | 1 \leq a \leq n \and gcd(a,n) = 1 }$\linebreak
 $\phi (mn) = \phi (m) * \phi (n)$
 \subsubsection{Modulares Multiplizieren}
@@ -154,45 +154,46 @@ Die Schlüssel werden je in einer separaten Datei gespeichert (pub.key, priv.key
 
 \lstinputlisting[language=haskell,caption=enterPrimes,style=JavaStyle]{includes/enterPrimes.hs}
 
-\subsection{Funktion isPrime}
+\subsubsection{Funktion isPrime}
 Der folgende Code überprüft ob eine Zahl x eine Primzahl ist. Um die Performance zu steigern, wird vor der Listenabfrage überprüft, ob die Zahl x durch 2 (even), 3, 5 oder 7 teilbar ist. Ist dies der Fall, wird sofort False zurückgegeben.
 Ist dies nicht der Fall, wird über die Funktion getDivisorList eine Liste aller Zahlen von 2 bis $\sqrt{x}$ generiert.
 
 Diese Liste wird nun mit der Funktion isNotDivisor auf Teiler von x überprüft. Sobald ein Teiler gefunden wird, liefert sie False zurück. Wird kein Teiler gefunden, ist die Zahl eine Primzahl und die Funktion gibt True zurück.
 \lstinputlisting[language=haskell,caption=Überprüfen ob Zahl Primzahl ist,style=JavaStyle]{includes/isPrime.hs}
 
-\subsection{Funktion inverseMod}
-Das modulare multiplikative Inverse Modulo benötigt, um den geheimen Teil des privaten Schlüssels zu berechnen. Dies geschieht mit Hilfe des erweiterten euklidischen Algorithmus. Die zugrundeliegenden mathematischen Formeln haben wir von Wikipedia.
+\subsubsection{Funktion inverseMod}
+Das modulare multiplikative Inverse Modulo benötigt, um den geheimen Teil des privaten Schlüssels zu berechnen. Dies geschieht mit Hilfe des erweiterten euklidischen Algorithmus. Die zugrunde liegenden mathematischen Formeln haben wir von Wikipedia.
 \lstinputlisting[language=haskell,caption=inverseMod,style=JavaStyle]{includes/inversemod.hs}
-
-\subsection{Funktion powerMod (Square \& Multiply)}
-Es wird eine Hilfsfunktion, powerModExec definiert, welche die eigentliche Berechung übernimmt. Es wird die Liste von 0 und 1 abgearbeitet und das Resultat c zurückgegeben, sobald die Liste leer ist. Die Liste repräsentiert den Exponenten in binärer Form. Ist das erste Element der Liste eine 0 wird c (vorheriges Resultat) quadriert, modulo n genommen und als neues c rekursiv übergeben. Ist das erste Element der Liste eine 1 wird zusätzlich danach zusätzlich mit der Basis b multipliziert und das Resultat wieder modulo n genommen. Den so erhaltenen Rest wird dann als neues c übergeben.
-
-\lstinputlisting[language=haskell,caption=powermod,style=JavaStyle]{includes/powermod.hs}
 
 \subsection{Funktion encrypt}
 Um einen String zu verschlüsseln wird der öffentliche Schlüssel benötigt. Dieser wird entweder aus einer zuvor mit generateKeyPair generierten oder einer von Hand erstellten Datei eingelesen.
 Die Funktion nimmt einen String auf, teilt ihn in möglichst grosse Blöcke (Blocklänge $<$ n) und verschlüsselt diese daraufhin Zeichen für Zeichen. Als Zahlenwert für die Zeichen wird die UTF8 Codierung verwendet.
-Damit bei der Entschlüsselung wieder dieselben Blöcke bearbeitet werden, wird der Cipher-Text (Geheimtext) in Form einer Integer-Liste ausgegeben, wobei jedes Element der Liste einen Nachrichten-Block representiert.
+Damit bei der Entschlüsselung wieder dieselben Blöcke bearbeitet werden, wird der Cipher-Text (Geheimtext) in Form einer Integer-Liste ausgegeben, wobei jedes Element der Liste einen Nachrichten-Block repräsentiert.
 Dadurch ist natürlich die Sicherheit der Verschlüsselung bei kleinen Schlüsseln nicht gewährleistet, da gleiche Blöcke auch immer den gleichen Geheimtext produzieren. Nimmt man jedoch grosse Schlüssel, in der Praxis mindestens $2^{512}$, so wird es nahezu unmöglich die Verschlüsselung zu knacken.
 
-% ------------------------ Probleme mit Zeichencodierung ? ---------------%
-
-
 \lstinputlisting[language=haskell,caption=encrypt,style=JavaStyle]{includes/encrypt.hs}
-\subsubsection{Funktion encryptString}
-\lstinputlisting[language=haskell,caption=encryptString,style=JavaStyle]{includes/encryptString.hs}
+\lstinputlisting[language=haskell,caption=Hilfsfunktionen für encrypt,style=JavaStyle]{includes/encryptString.hs}
 
 
 \subsection{Funktion decrypt}
-Für die Entschlüsselung wird eine Datei mit einem gültigen Privatekey benötigt. Der Geheimtext muss in Form einer Integer-Liste angegeben werden, so wie er bei der encrypt-Methode generiert wird.
+Für die Entschlüsselung wird eine Datei mit einem gültigen geheimen Schlüssel benötigt. Der Geheimtext muss in Form einer Integer-Liste angegeben werden, so wie er bei der encrypt-Methode generiert wird.
 Für die Entschlüsselung werden die Blöcke zuerst separat entschlüsselt und danach die einzelnen Zeichen wieder in UTF8 Zeichen umgewandelt und zu einem String zusammengesetzt.
 \lstinputlisting[language=haskell,caption=decrypt,style=JavaStyle]{includes/decrypt.hs}
-\subsubsection{Funktion decryptString}
-\lstinputlisting[language=haskell,caption=decryptString,style=JavaStyle]{includes/decryptString.hs}
+\lstinputlisting[language=haskell,caption=Hilfsfunktionen für decrypt,style=JavaStyle]{includes/decryptString.hs}
+
+\section{Hilfsfunktionen}
+Hier sind die Hilfsfunktionen aufgeführt, welche von den verschiedenen Funktionen verwendet werden.
+
+\subsection{Funktion powerMod (Square \& Multiply)}
+Es wird eine Hilfsfunktion, powerModExec definiert, welche die eigentliche Berechnung übernimmt. Es wird die Liste von 0 und 1 abgearbeitet und das Resultat c zurückgegeben, sobald die Liste leer ist. Die Liste repräsentiert den Exponenten in binärer Form. Ist das erste Element der Liste eine 0 wird c (vorheriges Resultat) quadriert, modulo n genommen und als neues c rekursiv übergeben. Ist das erste Element der Liste eine 1 wird zusätzlich danach zusätzlich mit der Basis b multipliziert und das Resultat wieder modulo n genommen. Den so erhaltenen Rest wird dann als neues c übergeben.
+\lstinputlisting[language=haskell,caption=powermod,style=JavaStyle]{includes/powermod.hs}
+
+\subsection{Funktionen für Blockgrössenbestimmung}
+Da $n$ nicht unendlich gross ist, muss der zu verschlüsselnde Text $m$ (falls $m>n$) in Blöcke aufgeteilt werden. Um die grösstmögliche Blockgrösse zu bestimmen, werden folgende Funktionen verwendet:
+\lstinputlisting[language=haskell,caption=Blockgrössenbestimmung,style=JavaStyle]{includes/encryptStringDecryptString.hs}
 
 \section{Limitierungen}
-Da dieses Projekt dazu dient Erfahrungen in der Programmierung mit Haskell zu sammeln, ist die RSA-Implementierung sehr einfach gehalten und sollte \textbf{NICHT} als Produktivsystem verwendet werden. Zudem müssen folgende Punkte bei der Angabe von Primzahlen berücksichtigt werden:
+Da dieses Projekt dazu dient Erfahrungen in der Programmierung mit Haskell zu sammeln, ist die RSA-Implementierung sehr einfach gehalten und sollte \textbf{NICHT} als Produktivsystem verwendet werden. Zudem müssen folgende Punkte bei der Interaktion mit dem Modul berücksichtigt werden:
 \begin{enumerate}
 \item Die Primzahlen sollte nicht zu gross gewählt werden, da es bei zu grossen Zahlen ($p*q$ $=$ $n$) zu einem Overflow kommen kann ($n$ $<$ $max(Int32)$).
 \item Die Rückführung der Integer-Liste in Cipher-Text wurde nicht berücksichtigt, da es hier zu Problemen mit der Zeichenkodierung kommen kann.
@@ -212,11 +213,15 @@ Liefert: $True$\\
 testDecryptExec: $testDecryptExec$ $55783673$ $1098922499$ $942137302$ $123123$\\
 Liefert: $True$
 
-- encryptString
-- decryptString
+\subsection{encryptString, decryptString}
+Hier testen wir, ob die Zeicheneingabe richtig umgewandelt wird und ob aus der Integer-Liste wieder derselbe String zurück kommt.
+\lstinputlisting[language=haskell,caption=testEncryptDecryptString,style=JavaStyle]{includes/testEncryptDecryptString.hs}
+\textbf{Beispiel:} $e=241$, $n=341$, $m=$"Test?äöü!\_-+ç", $d=61$\\
+$testEncryptDecryptString$ $m$ $e$ $d$ $n$\\
+Liefert: $True$
 
 \section{Ehrlichkeitserklärung}
-Hiermit erklären wir, dass wir die vorliegende Arbeit selbstständig und nur unter Zuhilfenahme der in den Kommentaren genannten Quellen angefertigt haben. Wir versichern zudem, diese Arbeit nicht bereits anderweitig als Leistungsnachweis verwendet zu haben.\\\\
+Hiermit erklären wir, dass wir die vorliegende Arbeit selbstständig und nur unter Zuhilfenahme der in den Kommentaren genannten Quellen angefertigt haben. Der Code unseres RSA Moduls ist so gut wie ausschliesslich im Pair-Programming entstanden und es kann nicht genau ermittelt werden, wer welche Codezeile beigesteuert hat. Wir versichern zudem, diese Arbeit nicht bereits anderweitig als Leistungsnachweis verwendet zu haben.\\\\
 Windisch, 4. Juni 2013
 
 

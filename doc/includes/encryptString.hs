@@ -22,26 +22,12 @@ charBlockToIntBlock cb e
   | (length cb) == 1 = (ord (head cb)) * (256^e)
   | otherwise = ((ord (head cb)) * (256^e)) + charBlockToIntBlock (tail cb) (e+1)
 
-  -- get list of char blocks to encrypt / decrypt
+-- get list of char blocks to encrypt / decrypt
 -- info: chars are stored as utf8 (8bits)
 getCharBlocks :: String -> Int -> [[Char]]
 getCharBlocks m n
   | (length m) <= (getNextPossibleCharBlockSize n) = [m]
   | otherwise = [(take (getNextPossibleCharBlockSize n) m)] ++ (getCharBlocks (drop (getNextPossibleCharBlockSize n) m) n)
-
--- if n < m -> RSA not possible, returns number of chars, not actual size
-getNextPossibleCharBlockSize :: (Integral b, Num a, Ord a) => a -> b
-getNextPossibleCharBlockSize n = snd (getNextSmallerPowerOfN 256 n)
-
--- returns last power of b which is still smaller than x
-getNextSmallerPowerOfN :: (Integral b, Num t, Ord t) => t -> t -> (t, b)
-getNextSmallerPowerOfN b x = getNextSmallerPowerOfN2 b x 1
-
-getNextSmallerPowerOfN2 :: (Integral b, Num t, Ord t) => t -> t -> b -> (t, b)
-getNextSmallerPowerOfN2 b x e
-  | x > (b^e) = getNextSmallerPowerOfN2 b x (e+1)
-  | x == (b^e) = (b^e,e)
-  | otherwise = (b^(e-1),(e-1))
 
 -- executes encryption
 encryptExec :: Integer -> Integer -> Integer -> Integer
