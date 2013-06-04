@@ -231,7 +231,5 @@ decrypt =
 testPowerMod :: Integer -> Integer -> Integer -> Bool
 testPowerMod b e m = powerMod b e m == mod (b^e) m
 
---testEncryptExec
---testDecryptExec
---testEncryptString
---testDecryptString
+testEncryptDecrypt :: String -> Integer -> Integer -> Integer -> Bool
+testEncryptDecrypt m e d n = m == (decryptString d n (encryptString d n m))
