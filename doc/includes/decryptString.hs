@@ -15,3 +15,7 @@ intBlockToCharBlock :: Int-> [Char]
 intBlockToCharBlock ib
   | ib == 0 = []
   | otherwise = [(chr (mod ib 256))] ++ intBlockToCharBlock (shiftR ib 8)
+
+-- executes decryption
+decryptExec :: Integer -> Integer -> Integer -> Integer
+decryptExec d n c = powerMod c d n

@@ -88,16 +88,7 @@
 
 % Titelbild
 \maketitle
-\thispagestyle{fancy}
 
-\newpage
-
-% Inhaltsverzeichnis
-\pagenumbering{Roman}
-\tableofcontents	  	
-
-
-\newpage
 \setcounter{page}{1}
 \pagenumbering{arabic}
 
@@ -133,7 +124,7 @@ $ggT(a,b)= ax+by$
 \subsubsection{modular multiplikatives Inverse}
 $a^{-1}\equiv x $ $(mod$ $ m)$
 \subsubsection{Eulersche Phi-Funktion}
-Die eulersche Phi-Funktion gibt aus wieviele Zahlen < n teilerfremd sind zu n.
+Die eulersche Phi-Funktion gibt aus wieviele Zahlen $<$ n teilerfremd sind zu n.
 $\phi (n) = { a \in N | 1 \leq a \leq n \and gcd(a,n) = 1 }$\linebreak
 $\phi (mn) = \phi (m) * \phi (n)$
 
@@ -149,7 +140,7 @@ Die Schlüssel werden je in einem separaten File gespeichert (pub.key, priv.key)
 
 \lstinputlisting[language=haskell,caption=enterPrimes,style=JavaStyle]{includes/enterPrimes.hs}
 
-\subsection{Funktion isPrime}
+\subsubsection{Funktion isPrime}
 Der folgende Code überprüft ob eine Zahl x eine Primzahl ist. Um die Performance zu steigern, wird vor der Listenabfrage überprüft, ob die Zahl x durch 2 (even), 3, 5 oder 7 teilbar ist. Ist dies der Fall, wird sofort False zurückgegeben.
 Ist dies nicht der Fall, wird über die Funktion getDivisorList eine Liste aller Zahlen von 2 bis $\sqrt{x}$ generiert.
 
@@ -163,7 +154,7 @@ Das modulare multiplikative Inverse Modulo benötigt, um den geheimen Teil des p
 
 \subsection{Funktion encrypt}
 Um einen String zu verschlüsseln wird der öffentliche Schlüssel benötigt. Dieser wird entweder aus einem zuvor mit generateKeyPair generierten, oder einem von Hand erstellten File eingelesen.
-Die Funktion nimmt einen String auf, teilt ihn in möglichst grosse Blöcke (Blocklänge < n) und verschlüsselt diese daraufhin Zeichen für Zeichen. Als Zahlenwert für die Zeichen wird jeweils der UTF8 Code verwendet.
+Die Funktion nimmt einen String auf, teilt ihn in möglichst grosse Blöcke (Blocklänge $<$ n) und verschlüsselt diese daraufhin Zeichen für Zeichen. Als Zahlenwert für die Zeichen wird jeweils der UTF8 Code verwendet.
 Damit bei der Entschlüsselung wieder dieselben Blöcke bearbeitet werden, wird der Cipher-Text (Geheimtext) in Form einer Integer-Liste ausgegeben, wobei jedes Element der Liste einen Nachrichten-Block darstellt.
 Dadurch ist natürlich die Sicherheit der Verschlüsselung bei kleinen Schlüsseln nicht gewährleistet, da gleiche Blöcke auch immer den gleichen Geheimtext produzieren. Nimmt man jedoch grosse Schlüssel, 
 % -- Grösse in der Praxis? 2^512? -- 
@@ -184,9 +175,9 @@ Dadurch ist natürlich die Sicherheit der Verschlüsselung bei kleinen Schlüsse
 \subsection{Funktion decrypt}
 Für die Verschlüsselung wird ein File mit einem gültigen Privatekey benötigt. Der Geheimtext muss in Form einer Integer-Liste angegeben werden, so wie er bei der Decrypt Methode generiert wird.
 Für die Entschlüsselung werden die Blöcke zuerst separat entschlüsselt und danach die einzelnen Zeichen wieder in UTF8 Zeichen umgewandelt und zu einem String zusammengesetzt.
-\lstinputlisting[language=haskell,caption=encrypt,style=JavaStyle]{includes/decrypt.hs}
+\lstinputlisting[language=haskell,caption=decrypt,style=JavaStyle]{includes/decrypt.hs}
 \subsubsection{Funktion decryptString}
-\lstinputlisting[language=haskell,caption=encrypt,style=JavaStyle]{includes/decryptString.hs}
+\lstinputlisting[language=haskell,caption=decryptString,style=JavaStyle]{includes/decryptString.hs}
 
 \section{Testfälle}
 \subsection{powerMod}

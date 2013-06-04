@@ -42,3 +42,7 @@ getNextSmallerPowerOfN2 b x e
   | x > (b^e) = getNextSmallerPowerOfN2 b x (e+1)
   | x == (b^e) = (b^e,e)
   | otherwise = (b^(e-1),(e-1))
+
+-- executes encryption
+encryptExec :: Integer -> Integer -> Integer -> Integer
+encryptExec e n m = powerMod m e n
