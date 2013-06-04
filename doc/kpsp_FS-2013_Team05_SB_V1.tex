@@ -104,14 +104,14 @@
 Dies ist ein Semesterprojekt im Modul Konzepte von Programmiersprachen an der Fachhochschule Nordwestschweiz. Ziel der Arbeit besteht darin Übung im Umgang mit funktionalen Programmiersprachen, insbesondere Haskell, zu bekommen.
 
 \section{Idee des Projektes}
-Ziel unseres Projektes ist es eine funktionierende Implementierung des Verschlüsselungssystem RSA umzusetzen. Diese wird nicht den Sicherheitsstandards für produktive RSA Verschlüsselungen entsprechen, sondern sie soll einen Überblick über die Funktionsweise des RSA Verschlüsselungsverfahrens bieten. Es werden daher sämtliche Funktionen bereitgestellten wie das Generieren von Schlüsseln (inkl. Primzahlenerkennung) sowie Ver- und Entschlüsselung von Strings.
+Ziel unseres Projektes ist es eine funktionierende Implementierung des Verschlüsselungssystem RSA umzusetzen. Diese wird nicht den Sicherheitsstandards für produktive RSA Verschlüsselungen entsprechen, sondern sie soll einen Überblick über die Funktionsweise des RSA Verschlüsselungsverfahrens bieten. Es werden daher die drei wichtigsten Funktionen bereitgestellt: das Generieren von Schlüsseln (inkl. Primzahlenprüfung), sowie Ver- und Entschlüsselung von Strings.
 
 Soweit möglich versuchen wir dabei die im Modul Kryptografie kennengelernten Algorithmen zu verwenden.
 
 \section{Theoretischer Teil}
 RSA (benannt nach den Erfindern Ron Rivest, Adi Shamir und Leonard Adleman) ist ein asymmetrisches kryptografisches Verschlüsselungsverfahren, welches sowohl zur Verschlüsselung, als auch zur digitalen Signatur verwendet werden kann.
 
-Es wird ein privater und ein öffentlicher Schlüssel generiert. Der Öffentliche wird zum Verschlüsseln und zum Prüfen von Signaturen verwendet und ist öffentlich zugänglich. Der private Schlüssel hingegen wird zum Entschlüsseln, sowie zum Signieren der Daten verwendet und muss geheim bleiben.
+Es wird ein privater und ein öffentlicher Schlüssel generiert. Der Öffentliche wird zum Verschlüsseln und zum Prüfen von Signaturen verwendet und ist für jedermann zugänglich. Der private Schlüssel hingegen wird zum Entschlüsseln, sowie zum Signieren der Daten verwendet und muss geheim bleiben.
 
 In der Praxis wird RSA meist nur noch verwendet, um die Schlüssel eines anderen Verschlüsselungsverfahren zu verschlüsseln und diesen so sicher übertragen zu können. Für unser Projekt verwenden wir RSA jedoch direkt um Strings zu verschlüsseln.
 
@@ -120,7 +120,7 @@ In der Praxis wird RSA meist nur noch verwendet, um die Schlüssel eines anderen
 \item Wähle 2 Primzahlen p, q
 \item n = p*q
 \item Wähle natürliche Zahl e, teilerfremd zu $\phi (n)$, d.h. $gcd(e,\phi(n)) = 1$, für die gilt $1 < e < \phi(n)$
-\item Bestimme natürliche Zahl d mit $d=e^{-1}$, d.h. $e*d \equiv 1$ $mod$ $\phi (n) \Longleftrightarrow e*d*+k*\phi (n) = 1$
+\item Bestimme natürliche Zahl d mit $d=e^{-1} \in \ZN^*_{\phi (n)}$, d.h. $e*d \equiv 1$ $mod$ $\phi (n) \Longleftrightarrow e*d*+k*\phi (n) = 1$
 \end{enumerate}
 
 \subsection{Verwendete mathematische Formeln und Algorithmen}
@@ -184,7 +184,7 @@ Für die Entschlüsselung werden die Blöcke zuerst separat entschlüsselt und d
 \section{Hilfsfunktionen}
 Hier sind die Hilfsfunktionen aufgeführt, welche von den verschiedenen Funktionen verwendet werden.
 
-\subsection{Funktion powerMod (Square \& Multiply)}
+\subsection{Funktion powerMod}
 Es wird eine Hilfsfunktion, powerModExec definiert, welche die eigentliche Berechnung übernimmt. Es wird die Liste von 0 und 1 abgearbeitet und das Resultat c zurückgegeben, sobald die Liste leer ist. Die Liste repräsentiert den Exponenten in binärer Form. Ist das erste Element der Liste eine 0 wird c (vorheriges Resultat) quadriert, modulo n genommen und als neues c rekursiv übergeben. Ist das erste Element der Liste eine 1 wird zusätzlich danach zusätzlich mit der Basis b multipliziert und das Resultat wieder modulo n genommen. Den so erhaltenen Rest wird dann als neues c übergeben.
 \lstinputlisting[language=haskell,caption=powermod,style=JavaStyle]{includes/powermod.hs}
 
