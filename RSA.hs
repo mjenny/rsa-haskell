@@ -92,8 +92,8 @@ enterPrimes e =
         prime <- getLine
         let q = read prime :: Integer
             phi = (p-1)*(q-1)
-        --if ((gcd e phi) == 1 && (isPrime p) && (isPrime q)) then
-        if ((gcd e phi) == 1) then
+        if ((gcd e phi) == 1 && (isPrime p) && (isPrime q)) then
+        --if ((gcd e phi) == 1) then
            return (p, q)
         else
            again
@@ -115,7 +115,7 @@ intBlockToCharBlock :: Int-> [Char]
 intBlockToCharBlock ib
   | ib == 0 = []
   | otherwise = [(chr (mod ib 256))] ++ intBlockToCharBlock (shiftR ib 8)
-  
+
 -- main function to encrypt strings
 encryptString :: Integer -> Integer -> [Char] -> [Integer]
 encryptString e n ms
@@ -221,15 +221,24 @@ decrypt =
        cipher <- getLine
        let c = read cipher :: [Integer]
        putStr "Decrypted text: "
-       putStrLn (show (decryptString d n c))
+       putStrLn (decryptString d n c)
 
 
 --------------------------------------------------
---	Testfälle
+--	test cases
 --------------------------------------------------
 
 testPowerMod :: Integer -> Integer -> Integer -> Bool
-testPowerMod b e m = powerMod b e m == mod (b^e) m
+testPowerMod b e m = (powerMod b e m) == (mod (b^e) m)
+
+testEncryptExec :: Integer -> Integer -> Integer -> Integer -> Bool
+testEncryptExec e n m c = (encryptExec e n m) == c
+
+testDecryptExec :: Integer -> Integer -> Integer -> Integer -> Bool
+testDecryptExec d n c m = (decryptExec d n c) == m
 
 testEncryptDecrypt :: String -> Integer -> Integer -> Integer -> Bool
 testEncryptDecrypt m e d n = m == (decryptString d n (encryptString d n m))
+
+--testEncryptString
+--testDecryptString

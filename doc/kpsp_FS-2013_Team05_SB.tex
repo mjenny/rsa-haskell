@@ -7,6 +7,7 @@
 \usepackage{amsthm}
 \usepackage{ulem}
 \usepackage{stmaryrd} %f\UTF{00FC}r Blitz!
+\usepackage{tikz}
 
 %PageStyle
 \usepackage[ngerman]{babel} % deutsche Silbentrennung
@@ -40,6 +41,11 @@
 \newcommand{\Lral}{\Longleftrightarrow}
 \newcommand{\Ral}{\Longrightarrow}
 \newcommand{\Lal}{\Longleftarrow}
+\newcommand{\RN}{\mathbb{R}} %Real Number
+\newcommand{\NN}{\mathbb{N}} %Natural Number
+\newcommand{\QN}{\mathbb{Q}} %Rational Number
+\newcommand{\ZN}{\mathbb{Z}} %ganze Zahlen
+\newcommand{\CN}{\mathbb{C}}
 
 % Code listenings
 \DeclareCaptionFont{white}{\color{white}}
@@ -78,7 +84,7 @@
 \pagestyle{plain}
 
 %Metadata
-\title{Implementation eines Verschlüsselungs-Algorithmus nach dem Beispiel von RSA in Haskell}
+\title{Implementation des RSA Verschlüsselungs-Algorithmus in Haskell}
 \author{Manuel Jenny \& Christian Glatthard, Projektteam 5}
 \date{4. Semester (FS 2013)}
 
@@ -127,7 +133,15 @@ $a^{-1}\equiv x $ $(mod$ $ m)$
 Die eulersche Phi-Funktion gibt aus wieviele Zahlen $<$ n teilerfremd sind zu n.
 $\phi (n) = { a \in N | 1 \leq a \leq n \and gcd(a,n) = 1 }$\linebreak
 $\phi (mn) = \phi (m) * \phi (n)$
-
+\subsubsection{Modulares Multiplizieren}
+Um effizient mit grossen Exponenten zu arbeiten, benutzen wir die binäre Exponentiation in Kombination mit Modulo. Dieser Algorithmus ist wie folgt definiert:\\
+Seien $a,b,n \in \ZN$ und $b,n > 1$. Berechne $a^b$ mod $n$.
+\begin{itemize}
+	\item[1.)] binäre Darstellung von b: $b=\sum_{i=0}^k \alpha_i2^i$ mit $\alpha \in \{0,1\}$.
+	\item[2.)] Anwendung auf a: \\
+		$a^{\sum_{i=0}^k \alpha_i2^i}$ = $\prod_{i=0}^{k} a^{\alpha_i2^i}$ = $a^{\alpha_k2^k}*a^{\alpha_{k-1}2^{k-1}}*a^{\alpha_{k-2}2^{k-2}} \dots  a^{\alpha_12}*a^{\alpha_0}$ = $($\dots$((a^{a_k})^2*a^{a_{k-1}})^2$\dots$*a^{\alpha_1})^2*a^{\alpha_0}$
+	\item[3.)] Das Verfahren besteht nun darin, den letzten Ausdruck von innen nach aussen auszuwerten und nach jeder Multiplikation das Resultat modulo $n$ zu rechnen.
+\end{itemize}
 \section{Haskell-Code}
 \subsection{Header}
 Wir schreiben sämtlichen Programmcode als Modul, so dass dieser auch in anderen Projekten genutzt werden kann. Dazu müssen sowohl Name des Moduls, als auch die nach aussen angebotenen Funktionen definiert werden (generateKeyPair, encrypt, decrypt). Per Import werden weitere Module geladen, die unser Programm benötigt.
@@ -135,30 +149,32 @@ Wir schreiben sämtlichen Programmcode als Modul, so dass dieser auch in anderen
 
 \subsection{Funktion generateKeyPair}
 Die exportierten Funktionen sind interaktiv programmiert. Durch Nutzung von System.IO können die Primzahlen sowie der öffentliche Schlüssel eingegeben werden. Der private Schlüssel d wird mithilfe des inversen Modulo berechnet.
-Die Schlüssel werden je in einem separaten File gespeichert (pub.key, priv.key), und können so theoretisch den entsprechenden Parteien zur Verfügung gestellt werden.
+Die Schlüssel werden je in einer separaten Datei gespeichert (pub.key, priv.key), und können so den entsprechenden Parteien zur Verfügung gestellt werden.
 \lstinputlisting[language=haskell,caption=generateKeyPair,style=JavaStyle]{includes/generateKeyPair.hs}
 
 \lstinputlisting[language=haskell,caption=enterPrimes,style=JavaStyle]{includes/enterPrimes.hs}
 
-\subsubsection{Funktion isPrime}
+\subsection{Funktion isPrime}
 Der folgende Code überprüft ob eine Zahl x eine Primzahl ist. Um die Performance zu steigern, wird vor der Listenabfrage überprüft, ob die Zahl x durch 2 (even), 3, 5 oder 7 teilbar ist. Ist dies der Fall, wird sofort False zurückgegeben.
 Ist dies nicht der Fall, wird über die Funktion getDivisorList eine Liste aller Zahlen von 2 bis $\sqrt{x}$ generiert.
 
 Diese Liste wird nun mit der Funktion isNotDivisor auf Teiler von x überprüft. Sobald ein Teiler gefunden wird, liefert sie False zurück. Wird kein Teiler gefunden, ist die Zahl eine Primzahl und die Funktion gibt True zurück.
 \lstinputlisting[language=haskell,caption=Überprüfen ob Zahl Primzahl ist,style=JavaStyle]{includes/isPrime.hs}
 
-\subsubsection{Funktion inverseMod}
+\subsection{Funktion inverseMod}
 Das modulare multiplikative Inverse Modulo benötigt, um den geheimen Teil des privaten Schlüssels zu berechnen. Dies geschieht mit Hilfe des erweiterten euklidischen Algorithmus. Die zugrundeliegenden mathematischen Formeln haben wir von Wikipedia.
 \lstinputlisting[language=haskell,caption=inverseMod,style=JavaStyle]{includes/inversemod.hs}
 
+\subsection{Funktion powerMod (Square \& Multiply)}
+Es wird eine Hilfsfunktion, powerModExec definiert, welche die eigentliche Berechung übernimmt. Es wird die Liste von 0 und 1 abgearbeitet und das Resultat c zurückgegeben, sobald die Liste leer ist. Die Liste repräsentiert den Exponenten in binärer Form. Ist das erste Element der Liste eine 0 wird c (vorheriges Resultat) quadriert, modulo n genommen und als neues c rekursiv übergeben. Ist das erste Element der Liste eine 1 wird zusätzlich danach zusätzlich mit der Basis b multipliziert und das Resultat wieder modulo n genommen. Den so erhaltenen Rest wird dann als neues c übergeben.
+
+\lstinputlisting[language=haskell,caption=powermod,style=JavaStyle]{includes/powermod.hs}
 
 \subsection{Funktion encrypt}
-Um einen String zu verschlüsseln wird der öffentliche Schlüssel benötigt. Dieser wird entweder aus einem zuvor mit generateKeyPair generierten, oder einem von Hand erstellten File eingelesen.
-Die Funktion nimmt einen String auf, teilt ihn in möglichst grosse Blöcke (Blocklänge $<$ n) und verschlüsselt diese daraufhin Zeichen für Zeichen. Als Zahlenwert für die Zeichen wird jeweils der UTF8 Code verwendet.
-Damit bei der Entschlüsselung wieder dieselben Blöcke bearbeitet werden, wird der Cipher-Text (Geheimtext) in Form einer Integer-Liste ausgegeben, wobei jedes Element der Liste einen Nachrichten-Block darstellt.
-Dadurch ist natürlich die Sicherheit der Verschlüsselung bei kleinen Schlüsseln nicht gewährleistet, da gleiche Blöcke auch immer den gleichen Geheimtext produzieren. Nimmt man jedoch grosse Schlüssel, 
-% -- Grösse in der Praxis? 2^512? -- 
- so wird es nahezu unmöglich die Verschlüsselung zu knacken.
+Um einen String zu verschlüsseln wird der öffentliche Schlüssel benötigt. Dieser wird entweder aus einer zuvor mit generateKeyPair generierten oder einer von Hand erstellten Datei eingelesen.
+Die Funktion nimmt einen String auf, teilt ihn in möglichst grosse Blöcke (Blocklänge $<$ n) und verschlüsselt diese daraufhin Zeichen für Zeichen. Als Zahlenwert für die Zeichen wird die UTF8 Codierung verwendet.
+Damit bei der Entschlüsselung wieder dieselben Blöcke bearbeitet werden, wird der Cipher-Text (Geheimtext) in Form einer Integer-Liste ausgegeben, wobei jedes Element der Liste einen Nachrichten-Block representiert.
+Dadurch ist natürlich die Sicherheit der Verschlüsselung bei kleinen Schlüsseln nicht gewährleistet, da gleiche Blöcke auch immer den gleichen Geheimtext produzieren. Nimmt man jedoch grosse Schlüssel, in der Praxis mindestens $2^{512}$, so wird es nahezu unmöglich die Verschlüsselung zu knacken.
 
 % ------------------------ Probleme mit Zeichencodierung ? ---------------%
 
@@ -167,23 +183,42 @@ Dadurch ist natürlich die Sicherheit der Verschlüsselung bei kleinen Schlüsse
 \subsubsection{Funktion encryptString}
 \lstinputlisting[language=haskell,caption=encryptString,style=JavaStyle]{includes/encryptString.hs}
 
-\subsubsection{Funktion powermod (Square \& Multiply)}
-% --- Erklärung Square & Multiply, evt. bereits im Theorie Teil ----- %
-\lstinputlisting[language=haskell,caption=powermod,style=JavaStyle]{includes/powermod.hs}
-
 
 \subsection{Funktion decrypt}
-Für die Verschlüsselung wird ein File mit einem gültigen Privatekey benötigt. Der Geheimtext muss in Form einer Integer-Liste angegeben werden, so wie er bei der Decrypt Methode generiert wird.
+Für die Entschlüsselung wird eine Datei mit einem gültigen Privatekey benötigt. Der Geheimtext muss in Form einer Integer-Liste angegeben werden, so wie er bei der encrypt-Methode generiert wird.
 Für die Entschlüsselung werden die Blöcke zuerst separat entschlüsselt und danach die einzelnen Zeichen wieder in UTF8 Zeichen umgewandelt und zu einem String zusammengesetzt.
 \lstinputlisting[language=haskell,caption=decrypt,style=JavaStyle]{includes/decrypt.hs}
 \subsubsection{Funktion decryptString}
 \lstinputlisting[language=haskell,caption=decryptString,style=JavaStyle]{includes/decryptString.hs}
+
+\section{Limitierungen}
+Da dieses Projekt dazu dient Erfahrungen in der Programmierung mit Haskell zu sammeln, ist die RSA-Implementierung sehr einfach gehalten und sollte \textbf{NICHT} als Produktivsystem verwendet werden. Zudem müssen folgende Punkte bei der Angabe von Primzahlen berücksichtigt werden:
+\begin{enumerate}
+\item Die Primzahlen sollte nicht zu gross gewählt werden, da es bei zu grossen Zahlen ($p*q$ $=$ $n$) zu einem Overflow kommen kann ($n$ $<$ $max(Int32)$).
+\item Die Rückführung der Integer-Liste in Cipher-Text wurde nicht berücksichtigt, da es hier zu Problemen mit der Zeichenkodierung kommen kann.
+\end{enumerate}
 
 \section{Testfälle}
 \subsection{powerMod}
 PowerMod ist kritisch für das Verschlüsseln mit grossen Zahlen. Um sicher zu gehen, dass unsere Implementation korrekt ist, haben wir eine Testfunktion dafür geschrieben.
 \lstinputlisting[language=haskell,caption=testPowerMod,style=JavaStyle]{includes/testPowerMod.hs}
 
+\subsection{encryptExec, decryptExec}
+Um zu testen, dass die verschlüsselte Nachricht entschlüsselt wieder dieselbe ist, existiert auch hier eine Testfunktion:
+\lstinputlisting[language=haskell,caption=testEncryptExec/testDecryptExec,style=JavaStyle]{includes/testEncryptDecryptExec.hs}
+\textbf{Beispiel:} $e=65537$, $n=1098922499$, $m=123123$, $c=942137302$\\
+testEncryptExec: $testEncryptExec$ $65537$ $1098922499$ $123123$ $942137302$\\
+Liefert: $True$\\
+testDecryptExec: $testDecryptExec$ $55783673$ $1098922499$ $942137302$ $123123$\\
+Liefert: $True$
 
+- encryptString
+- decryptString
+
+\section{Ehrlichkeitserklärung}
+Hiermit erklären wir, dass wir die vorliegende Arbeit selbstständig und nur unter Zuhilfenahme der in den Kommentaren genannten Quellen angefertigt haben. Wir versichern zudem, diese Arbeit nicht bereits anderweitig als Leistungsnachweis verwendet wurde.\\
+Windisch, 4. Juni 2013
+
+Christian Glatthard                          Manuel Jenny		
 
 \end{document} % Inhalt Ende 

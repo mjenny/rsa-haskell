@@ -10,9 +10,9 @@ enterPrimes e =
         prime <- getLine
         let q = read prime :: Integer
             phi = (p-1)*(q-1)
+        if ((gcd e phi) == 1 && (isPrime p) && (isPrime q)) then
 	-- ignore isPrime to use large possible primes generated with sage (http://www.sagemath.org)
-        --if ((gcd e phi) == 1 && (isPrime p) && (isPrime q)) then
-        if ((gcd e phi) == 1) then
+        --if ((gcd e phi) == 1) then
            return (p, q)
         else
            again
