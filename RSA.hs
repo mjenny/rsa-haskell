@@ -222,3 +222,16 @@ decrypt =
        let c = read cipher :: [Integer]
        putStr "Decrypted text: "
        putStrLn (show (decryptString d n c))
+
+
+--------------------------------------------------
+--	Testfälle
+--------------------------------------------------
+
+testPowerMod :: Integer -> Integer -> Integer -> Bool
+testPowerMod b e m = powerMod b e m == mod (b^e) m
+
+--testEncryptExec
+--testDecryptExec
+--testEncryptString
+--testDecryptString

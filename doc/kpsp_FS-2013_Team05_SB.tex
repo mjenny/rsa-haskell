@@ -116,6 +116,8 @@ RSA (benannt nach den Erfindern Ron Rivest, Adi Shamir und Leonard Adleman) ist 
 
 Es wird ein privater und ein öffentlicher Schlüssel generiert. Der Öffentliche wird zum Verschlüsseln und zum Prüfen von Signaturen verwendet und ist öffentlich zugänglich. Der private Schlüssel hingegen wird zum Entschlüsseln, sowie zum Signieren der Daten verwendet und muss geheim bleiben.
 
+In der Praxis wird RSA meist nur noch verwendet, um die Schlüssel eines anderen Verschlüsselungsverfahren zu verschlüsseln und diesen so sicher übertragen zu können. Für unser Projekt verwenden wir RSA jedoch direkt um Strings zu verschlüsseln.
+
 \subsection{Vorgehen RSA}
 \begin{enumerate}
 \item Wähle 2 Primzahlen p, q
@@ -125,12 +127,13 @@ Es wird ein privater und ein öffentlicher Schlüssel generiert. Der Öffentlich
 \end{enumerate}
 
 \subsection{Verwendete mathematische Formeln und Algorithmen}
-Bisher verwenden wir für unseren RSA Algorithmus die folgenden mathematischen Definitionen. 
+Für die Umsetzung von RSA sind einige mathematische Formeln und Definitionen unentbehrlich, diese haben wir hier aufgelistet.
 \subsubsection{erweiterter euklidischer Algorithmus}
 $ggT(a,b)= ax+by$
-\subsubsection{modulare multiplikative Inverse}
+\subsubsection{modular multiplikatives Inverse}
 $a^{-1}\equiv x $ $(mod$ $ m)$
 \subsubsection{Eulersche Phi-Funktion}
+Die eulersche Phi-Funktion gibt aus wieviele Zahlen < n teilerfremd sind zu n.
 $\phi (n) = { a \in N | 1 \leq a \leq n \and gcd(a,n) = 1 }$\linebreak
 $\phi (mn) = \phi (m) * \phi (n)$
 
@@ -144,7 +147,6 @@ Die exportierten Funktionen sind interaktiv programmiert. Durch Nutzung von Syst
 Die Schlüssel werden je in einem separaten File gespeichert (pub.key, priv.key), und können so theoretisch den entsprechenden Parteien zur Verfügung gestellt werden.
 \lstinputlisting[language=haskell,caption=generateKeyPair,style=JavaStyle]{includes/generateKeyPair.hs}
 
-\subsubsection{Funktion enterPrimes}
 \lstinputlisting[language=haskell,caption=enterPrimes,style=JavaStyle]{includes/enterPrimes.hs}
 
 \subsection{Funktion isPrime}
@@ -155,7 +157,7 @@ Diese Liste wird nun mit der Funktion isNotDivisor auf Teiler von x überprüft.
 \lstinputlisting[language=haskell,caption=Überprüfen ob Zahl Primzahl ist,style=JavaStyle]{includes/isPrime.hs}
 
 \subsubsection{Funktion inverseMod}
-Das modulare multiplikative Inverse Modulo benötigt, um einen Teil des privaten Schlüssels zu berechnen. Dies geschieht mit Hilfe des erweiterten euklidischen Algorithmus. Die zugrundeliegenden mathematischen Formeln haben wir von Wikipedia.
+Das modulare multiplikative Inverse Modulo benötigt, um den geheimen Teil des privaten Schlüssels zu berechnen. Dies geschieht mit Hilfe des erweiterten euklidischen Algorithmus. Die zugrundeliegenden mathematischen Formeln haben wir von Wikipedia.
 \lstinputlisting[language=haskell,caption=inverseMod,style=JavaStyle]{includes/inversemod.hs}
 
 
@@ -186,8 +188,15 @@ Für die Entschlüsselung werden die Blöcke zuerst separat entschlüsselt und d
 \subsubsection{Funktion decryptString}
 \lstinputlisting[language=haskell,caption=encrypt,style=JavaStyle]{includes/decryptString.hs}
 
-%\section{Testfälle}
-%tbd
+\section{Testfälle}
+\subsection{powerMod}
+PowerMod ist kritisch für das Verschlüsseln mit grossen Zahlen. Um sicher zu gehen dass unsere Implementation korrekt ist, haben wir eine Testfunktion dafür geschrieben.
+\lstinputlisting[language=haskell,caption=testPowerMod,style=JavaStyle]{includes/testPowerMod.hs}
+
+- encryptExcc
+- encryptString
+- decryptExec
+- decryptString
 
 
 \end{document} % Inhalt Ende 
