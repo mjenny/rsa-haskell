@@ -225,13 +225,17 @@ decrypt =
 
 
 --------------------------------------------------
---	Testf�lle
+--	test cases
 --------------------------------------------------
 
 testPowerMod :: Integer -> Integer -> Integer -> Bool
-testPowerMod b e m = powerMod b e m == mod (b^e) m
+testPowerMod b e m = (powerMod b e m) == (mod (b^e) m)
 
---testEncryptExec
---testDecryptExec
+testEncryptExec :: Integer -> Integer -> Integer -> Integer -> Bool
+testEncryptExec e n m c = (encryptExec e n m) == c
+
+testDecryptExec :: Integer -> Integer -> Integer -> Integer -> Bool
+testDecryptExec d n c m = (decryptExec d n c) == m
+
 --testEncryptString
 --testDecryptString

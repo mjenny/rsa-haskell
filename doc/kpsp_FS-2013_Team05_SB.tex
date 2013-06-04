@@ -154,17 +154,21 @@ Die Schlüssel werden je in einer separaten Datei gespeichert (pub.key, priv.key
 
 \lstinputlisting[language=haskell,caption=enterPrimes,style=JavaStyle]{includes/enterPrimes.hs}
 
-\subsubsection{Funktion isPrime}
+\subsection{Funktion isPrime}
 Der folgende Code überprüft ob eine Zahl x eine Primzahl ist. Um die Performance zu steigern, wird vor der Listenabfrage überprüft, ob die Zahl x durch 2 (even), 3, 5 oder 7 teilbar ist. Ist dies der Fall, wird sofort False zurückgegeben.
 Ist dies nicht der Fall, wird über die Funktion getDivisorList eine Liste aller Zahlen von 2 bis $\sqrt{x}$ generiert.
 
 Diese Liste wird nun mit der Funktion isNotDivisor auf Teiler von x überprüft. Sobald ein Teiler gefunden wird, liefert sie False zurück. Wird kein Teiler gefunden, ist die Zahl eine Primzahl und die Funktion gibt True zurück.
 \lstinputlisting[language=haskell,caption=Überprüfen ob Zahl Primzahl ist,style=JavaStyle]{includes/isPrime.hs}
 
-\subsubsection{Funktion inverseMod}
+\subsection{Funktion inverseMod}
 Das modulare multiplikative Inverse Modulo benötigt, um den geheimen Teil des privaten Schlüssels zu berechnen. Dies geschieht mit Hilfe des erweiterten euklidischen Algorithmus. Die zugrundeliegenden mathematischen Formeln haben wir von Wikipedia.
 \lstinputlisting[language=haskell,caption=inverseMod,style=JavaStyle]{includes/inversemod.hs}
 
+\subsection{Funktion powerMod (Square \& Multiply)}
+Es wird eine Hilfsfunktion, powerModExec definiert, welche die eigentliche Berechung übernimmt. Es wird die Liste von 0 und 1 abgearbeitet und das Resultat c zurückgegeben, sobald die Liste leer ist. Die Liste repräsentiert den Exponenten in binärer Form. Ist das erste Element der Liste eine 0 wird c (vorheriges Resultat) quadriert, modulo n genommen und als neues c rekursiv übergeben. Ist das erste Element der Liste eine 1 wird zusätzlich danach zusätzlich mit der Basis b multipliziert und das Resultat wieder modulo n genommen. Den so erhaltenen Rest wird dann als neues c übergeben.
+
+\lstinputlisting[language=haskell,caption=powermod,style=JavaStyle]{includes/powermod.hs}
 
 \subsection{Funktion encrypt}
 Um einen String zu verschlüsseln wird der öffentliche Schlüssel benötigt. Dieser wird entweder aus einer zuvor mit generateKeyPair generierten oder einer von Hand erstellten Datei eingelesen.
@@ -178,11 +182,6 @@ Dadurch ist natürlich die Sicherheit der Verschlüsselung bei kleinen Schlüsse
 \lstinputlisting[language=haskell,caption=encrypt,style=JavaStyle]{includes/encrypt.hs}
 \subsubsection{Funktion encryptString}
 \lstinputlisting[language=haskell,caption=encryptString,style=JavaStyle]{includes/encryptString.hs}
-
-\subsubsection{Funktion powerMod (Square \& Multiply)}
-Es wird eine Hilfsfunktion, powerModExec definiert, welche die eigentliche Berechung übernimmt. Es wird die Liste von 0 und 1 abgearbeitet und das Resultat c zurückgegeben, sobald die Liste leer ist. Die Liste repräsentiert den Exponenten in binärer Form. Ist das erste Element der Liste eine 0 wird c (vorheriges Resultat) quadriert, modulo n genommen und als neues c rekursiv übergeben. Ist das erste Element der Liste eine 1 wird zusätzlich danach zusätzlich mit der Basis b multipliziert und das Resultat wieder modulo n genommen. Den so erhaltenen Rest wird dann als neues c übergeben.
-
-\lstinputlisting[language=haskell,caption=powermod,style=JavaStyle]{includes/powermod.hs}
 
 
 \subsection{Funktion decrypt}
@@ -204,10 +203,22 @@ Da dieses Projekt dazu dient Erfahrungen in der Programmierung mit Haskell zu sa
 powerMod ist kritisch für das Verschlüsseln mit grossen Zahlen. Um sicher zu gehen dass unsere Implementation korrekt ist, haben wir eine Testfunktion dafür geschrieben.
 \lstinputlisting[language=haskell,caption=testPowerMod,style=JavaStyle]{includes/testPowerMod.hs}
 
-- encryptExcc
+\subsection{encryptExec, decryptExec}
+Um zu testen, dass die verschlüsselte Nachricht entschlüsselt wieder dieselbe ist, existiert auch hier eine Testfunktion:
+\lstinputlisting[language=haskell,caption=testEncryptExec/testDecryptExec,style=JavaStyle]{includes/testEncryptDecryptExec.hs}
+\textbf{Beispiel:} $e=65537$, $n=1098922499$, $m=123123$, $c=942137302$\\
+testEncryptExec: $testEncryptExec$ $65537$ $1098922499$ $123123$ $942137302$\\
+Liefert: $True$\\
+testDecryptExec: $testDecryptExec$ $55783673$ $1098922499$ $942137302$ $123123$\\
+Liefert: $True$
+
 - encryptString
-- decryptExec
 - decryptString
 
+\section{Ehrlichkeitserklärung}
+Hiermit erklären wir, dass wir die vorliegende Arbeit selbstständig und nur unter Zuhilfenahme der in den Kommentaren genannten Quellen angefertigt haben. Wir versichern zudem, diese Arbeit nicht bereits anderweitig als Leistungsnachweis verwendet wurde.\\
+Windisch, 4. Juni 2013
+
+Christian Glatthard                          Manuel Jenny		
 
 \end{document} % Inhalt Ende 
