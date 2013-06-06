@@ -13,25 +13,39 @@ import Data.Bits
 import Data.Char
 import System.IO
 
+-- # type definitions
+type PubKey = (Integer, Integer)
+type PrivKey = (Integer, Integer)
+type Prime = Integer
 
 -- # private functions
 
+-- define a three tuple
+fst3 :: (a, b, c) -> a
+fst3 (a,b,c) = a
+
+snd3 :: (a,b,c) -> b
+snd3 (a,b,c) = b
+
+thd3 :: (a, b, c) -> c
+thd3 (a,b,c) = c
+
 -- checks if x is prime
 -- all even numbers equal directly to False
-isPrime :: Integer -> Bool
+isPrime :: Prime -> Bool
 isPrime 1 = False
 isPrime 2 = True
 isPrime x | even x == False && (not ((mod x 5) == 0)) && (not ((mod x 3) == 0)) && (not ((mod x 7) == 0)) = isNotDivisor (getDivisorList x) x
 	  | otherwise = False
 
 -- returns a list of possible not even divisors for x which are smaller then sqrt of x
-getDivisorList :: Integer -> [Integer]
+getDivisorList :: Prime -> [Prime]
 getDivisorList x = [y | y <- 2:filter (not.even) [2.. (round (sqrt (fromInteger x)))]]
 
 -- checks wether there is an divisor or not
 -- returns False as soon as one divisor is found
 -- returns True if no divisor is found
-isNotDivisor :: [Integer] -> Integer -> Bool
+isNotDivisor :: [Prime] -> Prime -> Bool
 isNotDivisor [] _ = True
 isNotDivisor (w:ws) x | (mod x w) == 0 = False
 		      | otherwise = isNotDivisor ws x
@@ -80,24 +94,30 @@ encryptExec e n m = powerMod m e n
 decryptExec :: Integer -> Integer -> Integer -> Integer
 decryptExec d n c = powerMod c d n
 
--- Interaction to get fitting primes
+-- Interaction to get fitting primes and exponent
 -- Control.Monad.Fix idea from StackOverflow: http://stackoverflow.com/a/13301611
-enterPrimes :: Integer -> IO (Integer, Integer)
-enterPrimes e =
+enterExpPrimes :: IO (Integer, Prime, Prime)
+enterExpPrimes =
     fix $ \again -> do
+        putStrLn "Enter exponent (leave blank for default [65537])"
+        exp <- getLine
+        let e
+              | exp == "" = 65537 :: Integer
+              | otherwise = read exp :: Integer
         putStrLn "Enter first prime: "
         prime <- getLine
-        let p = read prime
+        let p = read prime :: Prime
         putStrLn "Enter second prime: "
         prime <- getLine
-        let q = read prime :: Integer
+        let q = read prime :: Prime
             phi = (p-1)*(q-1)
         if ((gcd e phi) == 1 && (isPrime p) && (isPrime q)) then
         -- ignore isPrime to use large possible primes generated with sage (http://www.sagemath.org)
         --if ((gcd e phi) == 1) then
-           return (p, q)
+           return (e, p, q)
         else
-           again
+           do putStrLn "ERROR: Exponent and primes don't match the requirements [(gcd e phi]) <> 1]"
+              again
 
 -- main function to decrypt strings
 decryptString :: Integer -> Integer -> [Integer] -> [Char]
@@ -168,26 +188,22 @@ getNextSmallerPowerOfNExec n x e
 -- Interaction to generate key pair which are stored in pub.key/priv.key
 generateKeyPair :: IO ()
 generateKeyPair =
-    do putStrLn "--------------------------------------------------------------------------"
-       putStrLn "Key generation started (e = 65537): "
+    do putStrLn "---------------------------------------------------------------------------"
+       putStrLn "-------------------------- Key generation started -------------------------"
+       putStrLn "---------------------------------------------------------------------------"
        writeFile ("pub.key") ""
        writeFile ("priv.key") ""
-       let e = 65537 :: Integer
        putStrLn "NOTICE: If the primes don't match the requirements [(gcd e phi) <> 1]"
-       putStrLn "you will have to enter different ones."
-       putStrLn "Enter exponent (leave blank for default [65537])"
-       exp <- getLine
-       let e
-            | exp == "" = 65537 :: Integer
-            | otherwise = read exp :: Integer
-       primes <- enterPrimes e :: IO (Integer, Integer)
-       let p = fst primes
-           q = snd primes :: Integer
+       putStrLn "In this case you will have to enter different ones."
+       expPrimes <- enterExpPrimes :: IO (Integer, Prime, Prime)
+       let e = fst3 expPrimes
+           p = snd3 expPrimes
+           q = thd3 expPrimes
            n = p*q
            phi = (p-1)*(q-1)
            d = inverseMod e phi :: Integer
-           resultPub = (e, n)
-           resultPriv = (d, n)
+           resultPub = (e, n) :: PubKey
+           resultPriv = (d, n) :: PrivKey
        writeFile ("pub.key") (show resultPub)
        writeFile ("priv.key") (show resultPriv)
        putStrLn ("Key pair saved in pub.key and priv.key")
@@ -198,9 +214,9 @@ encrypt =
     do putStrLn "Please enter fileName which contains public key (e.g. pub.key): "
        pubKeyFileName <- getLine
        stringFileContents <- readFile (pubKeyFileName)
-       let en = read stringFileContents :: (Integer, Integer)
-           e = fst en
-           n = snd en
+       let pub = read stringFileContents :: PubKey
+           e = fst pub
+           n = snd pub
        putStrLn "Please enter message to encrypt: "
        message <- getLine
        putStr "Encrypted text (as int blocks): "
@@ -212,9 +228,9 @@ decrypt =
     do putStrLn "Please enter fileName which contains private key (e.g. priv.key): "
        privKeyFileName <- getLine
        stringFileContents <- readFile (privKeyFileName)
-       let dn = read stringFileContents :: (Integer, Integer)
-           d = fst dn
-           n = snd dn
+       let priv = read stringFileContents :: PrivKey
+           d = fst priv
+           n = snd priv
        putStrLn "Please enter message to decrypt (as int blocks): "
        cipher <- getLine
        let c = read cipher :: [Integer]
