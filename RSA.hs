@@ -60,9 +60,8 @@ inverseMod e phi =
 -- extended euclidean algorithm
 euclid :: Integer -> Integer -> (Integer, Integer)
 euclid 0 n = (0,1)
-euclid e n
-  | n == 0 = (1,0)
-  | otherwise = (t, s-q*t)
+euclid _ 0 = (1,0)
+euclid = (t, s-q*t)
     where
       (q, r) = quotRem e n
       (s, t) = euclid n r
@@ -73,8 +72,8 @@ powerMod b e m = powerModExec b (toBin e) m 1
 
  -- modular exponentiation execution
 powerModExec :: Integer -> [Integer] -> Integer -> Integer -> Integer
+powerModExec _ [] _ c = c
 powerModExec b e m c
-    | e == [] = c
     | head e == 1 = powerModExec b (tail e) m ((c^2 `mod ` m)*b `mod` m)
     | otherwise = powerModExec b (tail e) m (c^2 `mod` m)
 
