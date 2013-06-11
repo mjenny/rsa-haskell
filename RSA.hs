@@ -59,9 +59,9 @@ inverseMod e phi =
 
 -- extended euclidean algorithm
 euclid :: Integer -> Integer -> (Integer, Integer)
-euclid 0 n = (0,1)
+euclid 0 _ = (0,1)
 euclid _ 0 = (1,0)
-euclid = (t, s-q*t)
+euclid e n = (t, s-q*t)
     where
       (q, r) = quotRem e n
       (s, t) = euclid n r
@@ -132,9 +132,8 @@ decryptBlocks d n bs
 
   -- ib = int block, m = modulo, b = block size (chars)
 intBlockToCharBlock :: Int-> [Char]
-intBlockToCharBlock ib
-  | ib == 0 = []
-  | otherwise = [(chr (mod ib 256))] ++ intBlockToCharBlock (shiftR ib 8)
+intBlockToCharBlock 0 = []
+intBlockToCharBlock ib = [(chr (mod ib 256))] ++ intBlockToCharBlock (shiftR ib 8)
 
 -- main function to encrypt strings
 encryptString :: Integer -> Integer -> [Char] -> [Integer]
