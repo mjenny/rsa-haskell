@@ -55,7 +55,7 @@ inverseMod :: Integer -> Integer -> Integer
 inverseMod e phi =
   (x + phi) `mod` phi
   where
-    (z, (x, y)) = ((gcd e phi),euclid e phi)
+    (x, y) = euclid e phi
 
 -- extended euclidean algorithm
 euclid :: Integer -> Integer -> (Integer, Integer)
