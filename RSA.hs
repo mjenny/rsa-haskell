@@ -73,9 +73,8 @@ powerMod b e m = powerModExec b (toBin e) m 1
  -- modular exponentiation execution
 powerModExec :: Integer -> [Integer] -> Integer -> Integer -> Integer
 powerModExec _ [] _ c = c
-powerModExec b e m c
-    | head e == 1 = powerModExec b (tail e) m ((c^2 `mod ` m)*b `mod` m)
-    | otherwise = powerModExec b (tail e) m (c^2 `mod` m)
+powerModExec b (1:e) m c = powerModExec b e m ((c^2 `mod ` m)*b `mod` m)
+powerModExec b (0:e) m c = powerModExec b e m (c^2 `mod` m)
 
 -- convert Integer to an Integer list which represents original Integer in binary
 toBin :: Integer -> [Integer]
