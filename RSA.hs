@@ -207,8 +207,8 @@ generateKeyPair =
        putStrLn ("Key pair saved in pub.key and priv.key")
 
 -- interaction for encryption process
-encrypt :: IO ()
-encrypt =
+encryptOld :: IO ()
+encryptOld =
     do putStrLn "Please enter fileName which contains public key (e.g. pub.key): "
        pubKeyFileName <- getLine
        stringFileContents <- readFile (pubKeyFileName)
@@ -220,9 +220,28 @@ encrypt =
        putStr "Encrypted text (as int blocks): "
        putStrLn (show (encryptString e n message))
 
+-- interaction for encryption process
+encrypt :: IO ()
+encrypt =
+    do putStrLn "Please enter fileName which contains public key (e.g. pub.key): "
+       pubKeyFileName <- getLine
+       stringFileContents <- readFile (pubKeyFileName)
+       let pub = read stringFileContents :: PubKey
+           e = fst pub
+           n = snd pub
+       putStrLn "Please enter fileName which contains text to encrypt (plainText.txt): "
+       fileName <- getLine
+       message <- readFile (fileName)
+       putStrLn "Please enter fileName to store encrypted text (encryptedText.txt): "
+       fileName <- getLine
+       writeFile (fileName) ""
+       writeFile (fileName) (show (encryptString e n message))
+       putStr "Encrypted text stored in "
+       putStrLn (fileName)
+
 -- interaction for decryption process
-decrypt :: IO ()
-decrypt =
+decryptOld :: IO ()
+decryptOld =
     do putStrLn "Please enter fileName which contains private key (e.g. priv.key): "
        privKeyFileName <- getLine
        stringFileContents <- readFile (privKeyFileName)
@@ -234,6 +253,26 @@ decrypt =
        let c = read cipher :: [Integer]
        putStr "Decrypted text: "
        putStrLn (decryptString d n c)
+
+-- interaction for decryption process
+decrypt :: IO ()
+decrypt =
+    do putStrLn "Please enter fileName which contains private key (e.g. priv.key): "
+       privKeyFileName <- getLine
+       stringFileContents <- readFile (privKeyFileName)
+       let priv = read stringFileContents :: PrivKey
+           d = fst priv
+           n = snd priv
+       putStrLn "Please enter fileName which contains text to decrypt (encryptedText.txt): "
+       fileName <- getLine
+       cipher <- readFile (fileName)
+       let c = read cipher :: [Integer]
+       putStrLn "Please enter fileName to store decrypted text (decryptedText.txt): "
+       fileName <- getLine
+       writeFile (fileName) ""
+       writeFile (fileName) (decryptString d n c)
+       putStr "Decrypted text stored in "
+       putStrLn (fileName)
 
 ----------------------------------------------
 --	test cases
